@@ -1,0 +1,34 @@
+{
+  "name": "ArduinoHomebridgeMqtt",
+  "keywords": "homebridge, homekit",
+  "description": "Arduino library for connecting to Homebridge",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/waritsan/arduino-homebridge-mqtt.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Warit Santaputra",
+      "email": "waritsan@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "dependencies":
+  [
+    {
+      "name": "AsyncMqttClient",
+      "authors": "Marvin Roger",
+      "frameworks": "arduino"
+    },
+    {
+      "name": "ArduinoJson",
+      "authors": "Benoit Blanchon",
+      "frameworks": "arduino"
+    },
+  ],
+  "version": "0.0.1",
+  "frameworks": "arduino",
+  "platforms": "*"
+}
