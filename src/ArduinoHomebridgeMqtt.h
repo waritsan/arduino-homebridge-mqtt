@@ -22,9 +22,9 @@ private:
   void onMessage();
 public:
   ArduinoHomebridgeMqtt();
-  ArduinoHomebridgeMqtt(String name, IPAddress ipAddress, int port);
+  ArduinoHomebridgeMqtt(String name, IPAddress ipAddress);
   void setName(String name);
-  void setMqttServer(IPAddress ipAddress, int port);
+  void setMqttServer(IPAddress ipAddress);
   void setCallback(std::function<void(int)>);
   void setCallback(std::function<void(int)>, std::function<void(int)>);
   void connect();

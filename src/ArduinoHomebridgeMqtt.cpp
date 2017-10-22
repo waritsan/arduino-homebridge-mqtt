@@ -7,18 +7,16 @@ const String ArduinoHomebridgeMqtt::TARGET_HEATING_COOLING_STATE = "TargetHeatin
 const String ArduinoHomebridgeMqtt::ON = "On";
 
 ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt() {
-  setMqttServer(DEFAULT_MQTT_HOST, DEFAULT_MQTT_PORT);
+  setMqttServer(DEFAULT_MQTT_HOST);
 }
 
-ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(String name, IPAddress ipAddress, int port) {
+ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(String name, IPAddress ipAddress) {
   setName(name);
-  setMqttServer(ipAddress, port);
+  setMqttServer(ipAddress);
 }
 
-void ArduinoHomebridgeMqtt::setMqttServer(IPAddress ipAddress, int port) {
-  this->ipAddress = ipAddress;
-  this->port = port;
-  mqttClient.setServer(ipAddress, port);
+void ArduinoHomebridgeMqtt::setMqttServer(IPAddress ipAddress) {
+  mqttClient.setServer(ipAddress, DEFAULT_MQTT_PORT);
 }
 
 void ArduinoHomebridgeMqtt::setName(String name) {
@@ -37,8 +35,7 @@ void ArduinoHomebridgeMqtt::setCallback(std::function<void (int)> callback, std:
 
 void ArduinoHomebridgeMqtt::connect() {
   mqttClient.onConnect([this](bool sessionPresent) -> void {
-    Serial.print("Connected to MQTT host: ");
-    Serial.println(ipAddress);
+    Serial.println("Connected to MQTT host");
     mqttClient.subscribe("homebridge/from/set", 0);
     mqttClient.subscribe("homebridge/from/response", 0);
     getAccessory();

@@ -3,12 +3,11 @@
 #include "WiFiManager.h"
 
 #define MQTT_HOST IPAddress(192, 168, 1, 40)
-#define MQTT_PORT 1883
 #define ACCESSORY_NAME "esp_switch"
 #define OUTPUT_PIN D1
 
 WiFiManager wifiManager;
-ArduinoHomebridgeMqtt homebridgeMqtt(ACCESSORY_NAME, MQTT_HOST, MQTT_PORT);
+ArduinoHomebridgeMqtt homebridgeMqtt(ACCESSORY_NAME, MQTT_HOST);
 
 void callback(bool isOn) {
   if (isOn) {
