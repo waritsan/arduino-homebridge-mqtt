@@ -1,34 +1,34 @@
 #include <AsyncMqttClient.h>
 #include <ArduinoJson.h>
 
-#define DEFAULT_MQTT_HOST IPAddress(192, 168, 1, 40)
 #define DEFAULT_MQTT_PORT 1883
+#define SERVICES_SIZE 10
+#define CHARACTERISTICS_SIZE 20
+
+struct Characteristic {
+  String name;
+  int value;
+};
+
+struct Service {
+  String name;
+  String type;
+  Characteristic characteristics[CHARACTERISTICS_SIZE];
+};
+
+struct Accessory {
+  String name;
+  Service services[SERVICES_SIZE];
+};
 
 class ArduinoHomebridgeMqtt {
 private:
-  static const String CURRENT_TEMPERATURE;
-  static const String TARGET_TEMPERATURE;
-  static const String CURRENT_HEATING_COOLING_STATE;
-  static const String TARGET_HEATING_COOLING_STATE;
-  static const String ON;
-
+  Accessory& accessory;
   AsyncMqttClient mqttClient;
-  IPAddress ipAddress;
-  int port;
-  String name;
-  std::function<void(int)> callback;
-  std::function<void(int)> callback1;
-  void set(String characteristic, int value);
-  void onMessage();
+  IPAddress mqttHost;
+  
 public:
-  ArduinoHomebridgeMqtt();
-  ArduinoHomebridgeMqtt(String name, IPAddress ipAddress);
-  void setName(String name);
-  void setMqttServer(IPAddress ipAddress);
-  void setCallback(std::function<void(int)>);
-  void setCallback(std::function<void(int)>, std::function<void(int)>);
-  void connect();
-  void setCurrentTemperature(int);
-  void setCurrentHeatingCoolingState(int);
+  ArduinoHomebridgeMqtt(Accessory& accessory, IPAddress mqttHost);
   void getAccessory();
+  void connect();
 };
