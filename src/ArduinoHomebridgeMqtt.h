@@ -26,9 +26,10 @@ private:
   Accessory& accessory;
   AsyncMqttClient mqttClient;
   IPAddress mqttHost;
-  
+
 public:
   ArduinoHomebridgeMqtt(Accessory& accessory, IPAddress mqttHost);
   void getAccessory();
+  void addAccessory();
   void connect();
 };

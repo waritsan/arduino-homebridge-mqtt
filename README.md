@@ -11,7 +11,7 @@ Arduino library for connecting to Homebridge.
 * [PlatformIO](http://platformio.org/lib)
 
 homebridge/from/response
-{"ack":false,"message":"name 'esp_swi1' undefined."}
+"{"ack":false,"message":"name 'ESP1769030' undefined."}"
 
 topic: homebridge/from/response
 payload:
