@@ -1,35 +1,26 @@
 #include <AsyncMqttClient.h>
 #include <ArduinoJson.h>
+#include "Accessory.h"
 
 #define DEFAULT_MQTT_PORT 1883
-#define SERVICES_SIZE 10
-#define CHARACTERISTICS_SIZE 20
-
-struct Characteristic {
-  String name;
-  int value;
-};
-
-struct Service {
-  String name;
-  String type;
-  Characteristic characteristics[CHARACTERISTICS_SIZE];
-};
-
-struct Accessory {
-  String name;
-  Service services[SERVICES_SIZE];
-};
 
 class ArduinoHomebridgeMqtt {
 private:
-  Accessory& accessory;
+  Accessory accessory;
   AsyncMqttClient mqttClient;
   IPAddress mqttHost;
+  std::function<void(int)> onSetOn;
+  std::function<void(int)> onSetTargetTemperature;
+  std::function<void(int)> onSetTargetHeatingCoolingState;
+  void addAccessory();
+  void addService(Service);
+  void getAccessory();
 
 public:
-  ArduinoHomebridgeMqtt(Accessory& accessory, IPAddress mqttHost);
-  void getAccessory();
-  void addAccessory();
+  ArduinoHomebridgeMqtt(IPAddress mqttHost);
   void connect();
+  void addSwitch(std::function<void(int)> onSetOn);
+  void addThermostat(std::function<void(int)> onSetTargetTemperature, std::function<void(int)> onSetTargetHeatingCoolingState);
+  void setCurrentTemperature(int currentTemperature);
+  void setCurrentHeatingCoolingState(int currentHeatingCoolingState);
 };
