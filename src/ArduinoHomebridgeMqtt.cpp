@@ -1,18 +1,35 @@
 #include "ArduinoHomebridgeMqtt.h"
 
-ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(IPAddress mqttHost) {
-  this->mqttHost = mqttHost;
+const int ArduinoHomebridgeMqtt::DEFAULT_MQTT_PORT = 1883;
+const String ArduinoHomebridgeMqtt::CURRENT_TEMPERATURE = "CurrentTemperature";
+const String ArduinoHomebridgeMqtt::CURRENT_HEATING_COOLING_STATE = "CurrentHeatingCoolingState";
+const String ArduinoHomebridgeMqtt::TARGET_TEMPERATURE = "TargetTemperature";
+const String ArduinoHomebridgeMqtt::TARGET_HEATING_COOLING_STATE = "TargetHeatingCoolingState";
+const String ArduinoHomebridgeMqtt::ON = "On";
+
+ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt() {}
+
+ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(String serviceName, IPAddress server) {
+  setServiceName(serviceName);
+  setMqttServer(server);
 }
 
-void ArduinoHomebridgeMqtt::addSwitch(std::function<void (int)> onSetOn) {
-  this->onSetOn = onSetOn;
-  Service switchService;
-  switchService.setName("Switch");
-  switchService.setType("Switch");
-  Characteristic onCharacteristic;
-  onCharacteristic.setName("On");
-  switchService.addCharacteristic(onCharacteristic);
-  addService(switchService);
+void ArduinoHomebridgeMqtt::setMqttServer(IPAddress server) {
+  mqttClient.setServer(server, DEFAULT_MQTT_PORT);
+}
+
+void ArduinoHomebridgeMqtt::setServiceName(String serviceName) {
+  this->serviceName = serviceName;
+}
+
+void ArduinoHomebridgeMqtt::setCallback(std::function<void (int)> callback) {
+  this->callback = callback;
+  onMessage();
+}
+
+void ArduinoHomebridgeMqtt::setCallback(std::function<void (int)> callback, std::function<void (int)> callback1) {
+  this->callback1 = callback1;
+  setCallback(callback);
 }
 
 void ArduinoHomebridgeMqtt::connect() {
@@ -22,70 +39,59 @@ void ArduinoHomebridgeMqtt::connect() {
     mqttClient.subscribe("homebridge/from/response", 0);
     getAccessory();
   });
-  mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
-    StaticJsonBuffer<256> jsonBuffer;
-    JsonObject& root = jsonBuffer.parseObject(payload);
-    if (!root.success()) {
-      Serial.print("Error: ");
-      Serial.println(topic);
-      Serial.println(payload);
-      return;
-    }
-    if (root["ack"] == false) {
-      String message = root["message"];
-      if (message.indexOf(accessory.getName()) > 0) {
-        addAccessory();
-      }
-      return;
-    }
-    if (strcmp(topic, "homebridge/from/set") == 0 && accessory.getName() == root["name"] && accessory.getServiceByName(root["service_name"])) {
-      accessory.getServiceByName(root["service_name"])->getCharacteristicByName(root["characteristic"])->setValue(root["value"]);
-      if (root["characteristic"] == "On") {
-        onSetOn(root["value"]);
-      }
-    }
-    if (strcmp(topic, "homebridge/from/response") == 0 && root[accessory.getName()]) {
-      if (int value = root[accessory.getName()]["characteristics"]["Switch"]["On"]) {
-        accessory.getServiceByName("Switch")->getCharacteristicByName("On")->setValue(value);
-        onSetOn(value);
-      }
-    }
-  });
-  mqttClient.setServer(mqttHost, DEFAULT_MQTT_PORT);
   mqttClient.connect();
-}
-
-// Private
-void ArduinoHomebridgeMqtt::addService(Service service) {
-  accessory.addService(service);
-  StaticJsonBuffer<128> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = accessory.getName();
-  root["service_name"] = service.getName();
-  root["service"] = service.getType();
-  char payload[128];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/add/service", 0, true, payload);
-  Serial.println(payload);
-}
-
-void ArduinoHomebridgeMqtt::addAccessory() {
-  StaticJsonBuffer<128> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = accessory.getName();
-  root["service_name"] = accessory.getFirstService()->getName();
-  root["service"] = accessory.getFirstService()->getType();
-  char payload[128];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/add", 0, true, payload);
-  Serial.println(payload);
 }
 
 void ArduinoHomebridgeMqtt::getAccessory() {
   StaticJsonBuffer<128> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
-  root["name"] = accessory.getName();
+  root["name"] = accessoryName;
   char payload[128];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/get", 0, true, payload);
+}
+
+void ArduinoHomebridgeMqtt::set(String characteristic, int value) {
+  StaticJsonBuffer<128> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+  root["name"] = accessoryName;
+  root["characteristic"] = characteristic;
+  root["value"] = value;
+  char payload[128];
+  root.printTo(payload);
+  mqttClient.publish("homebridge/to/set", 0, true, payload);
+}
+
+// Private
+void ArduinoHomebridgeMqtt::onMessage() {
+  mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
+    StaticJsonBuffer<256> jsonBuffer;
+    JsonObject& root = jsonBuffer.parseObject(payload);
+    if (!root.success()) {
+      return;
+    }
+    if (strcmp(topic, "homebridge/from/set") == 0 && accessoryName == root["name"]) {
+      String characteristic = root["characteristic"];
+      int value = root["value"];
+      if (characteristic == TARGET_TEMPERATURE) {
+        callback(value);
+      } else if (characteristic == TARGET_HEATING_COOLING_STATE) {
+        callback1(value);
+      } else if (characteristic == ON) {
+        callback(value);
+      }
+    }
+    if (strcmp(topic, "homebridge/from/response") == 0 && root[accessoryName]) {
+      JsonObject& characteristics = root[accessoryName]["characteristics"][serviceName];
+      if (int value = characteristics[TARGET_TEMPERATURE]) {
+        callback(value);
+      }
+      if (int value = characteristics[TARGET_HEATING_COOLING_STATE]) {
+        callback1(value);
+      }
+      if (int value = characteristics[ON]) {
+        callback(value);
+      }
+    }
+  });
 }
