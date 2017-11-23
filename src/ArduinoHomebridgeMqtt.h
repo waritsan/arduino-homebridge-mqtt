@@ -1,32 +1,34 @@
 #include <AsyncMqttClient.h>
 #include <ArduinoJson.h>
 
+#define DEFAULT_MQTT_PORT 1883
+
+struct Accessory {
+  String name;
+};
+
+struct Service {
+  String name;
+  String type;
+};
+
+struct Characteristic {
+  String name;
+  int value;
+};
+
 class ArduinoHomebridgeMqtt {
 private:
-  static const int DEFAULT_MQTT_PORT;
-  static const String CURRENT_TEMPERATURE;
-  static const String TARGET_TEMPERATURE;
-  static const String CURRENT_HEATING_COOLING_STATE;
-  static const String TARGET_HEATING_COOLING_STATE;
-  static const String ON;
-
   AsyncMqttClient mqttClient;
-  String accessoryName;
-  String serviceName;
-  std::function<void(int)> callback;
-  std::function<void(int)> callback1;
-  void onMessage();
-  void getAccessory();
-  void addAccessory();
-  void addService();
+  std::function<void(Accessory, Service, Characteristic)> callback;
 
 public:
-  ArduinoHomebridgeMqtt();
-  ArduinoHomebridgeMqtt(String serviceName, IPAddress server);
-  void setServiceName(String serviceName);
-  void setMqttServer(IPAddress server);
-  void setCallback(std::function<void(int)> callback);
-  void setCallback(std::function<void(int)> callback, std::function<void(int)> callback1);
-  void connect();
-  void set(String characteristic, int value);
+  void onCallback(std::function<void(Accessory, Service, Characteristic)>);
+  void connect(IPAddress);
+  void addAccessory(Accessory, Service);
+  void addService(Accessory, Service);
+  void removeAccessory(Accessory);
+  void removeService(Accessory, Service);
+  void getCharacteristic(Accessory, Service, Characteristic);
+  void setChracteristic(Accessory, Service, Characteristic);
 };

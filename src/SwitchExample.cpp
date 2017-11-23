@@ -1,14 +1,21 @@
+#include <Arduino.h>
+#include <WiFiManager.h>
 #include "ArduinoHomebridgeMqtt.h"
 
 #define MQTT_SERVER IPAddress(192, 168, 1, 40)
-#define SERVICE_NAME "Light"
 #define OUTPUT_PIN D1
 
-void callback(bool on);
+WiFiManager wifiManager;
 ArduinoHomebridgeMqtt homebridgeMqtt;
+Accessory switchAccessory;
+Service switchService;
+Characteristic onCharacteristic;
 
-void callback(bool on) {
-  if (on) {
+void callback(Accessory accessory, Service service, Characteristic characteristic) {
+  if (switchAccessory.name != accessory.name || switchService.name != service.name || onCharacteristic.name != characteristic.name) {
+    return;
+  }
+  if (characteristic.value) {
     Serial.println("ON");
     digitalWrite(OUTPUT_PIN, HIGH);
   } else {
@@ -18,12 +25,16 @@ void callback(bool on) {
 }
 
 void setup() {
-  homebridgeMqtt.setMqttServer(MQTT_SERVER);
-  homebridgeMqtt.setServiceName(SERVICE_NAME);
-  homebridgeMqtt.setCallback(callback);
-  homebridgeMqtt.connect();
+  Serial.begin(115200);
+  pinMode(OUTPUT_PIN, OUTPUT);
+  wifiManager.autoConnect();
+  switchAccessory.name = "esp_switch";
+  switchService.name = "esp_switch";
+  switchService.type = "Switch";
+  onCharacteristic.name = "On";
+  homebridgeMqtt.onCallback(callback);
+  homebridgeMqtt.connect(MQTT_SERVER);
 }
 
 void loop() {
-
 }
