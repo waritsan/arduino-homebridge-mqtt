@@ -23,12 +23,12 @@ private:
   std::function<void(Accessory, Service, Characteristic)> callback;
 
 public:
-  void onCallback(std::function<void(Accessory, Service, Characteristic)>);
+  void onSetValueFromHomebridge(std::function<void(Accessory, Service, Characteristic)>);
   void connect(IPAddress);
   void addAccessory(Accessory, Service);
   void addService(Accessory, Service);
   void removeAccessory(Accessory);
   void removeService(Accessory, Service);
-  void getCharacteristic(Accessory, Service, Characteristic);
-  void setChracteristic(Accessory, Service, Characteristic);
+  void getAccessory(Accessory);
+  void setValueToHomebridge(Accessory, Service, Characteristic);
 };

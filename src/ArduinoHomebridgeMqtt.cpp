@@ -1,7 +1,6 @@
 #include "ArduinoHomebridgeMqtt.h"
 
-
-void ArduinoHomebridgeMqtt::onCallback(std::function<void(Accessory, Service, Characteristic)> callback) {
+void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(Accessory, Service, Characteristic)> callback) {
   this->callback = callback;
   mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
     StaticJsonBuffer<256> jsonBuffer;
@@ -57,7 +56,7 @@ void ArduinoHomebridgeMqtt::addAccessory(Accessory accessory, Service service) {
   mqttClient.publish("homebridge/to/set", 0, true, payload);
 }
 
-void ArduinoHomebridgeMqtt::getCharacteristic(Accessory accessory, Service, Characteristic) {
+void ArduinoHomebridgeMqtt::getAccessory(Accessory accessory) {
   StaticJsonBuffer<128> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
   root["name"] = accessory.name;
@@ -66,14 +65,14 @@ void ArduinoHomebridgeMqtt::getCharacteristic(Accessory accessory, Service, Char
   mqttClient.publish("homebridge/to/get", 0, true, payload);
 }
 
-void ArduinoHomebridgeMqtt::setChracteristic(Accessory accessory, Service service, Characteristic characteristic) {
-  StaticJsonBuffer<128> jsonBuffer;
+void ArduinoHomebridgeMqtt::setValueToHomebridge(Accessory accessory, Service service, Characteristic characteristic) {
+  StaticJsonBuffer<256> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
   root["name"] = accessory.name;
   root["service_name"] = service.name;
   root["characteristic"] = characteristic.name;
   root["value"] = characteristic.value;
-  char payload[128];
+  char payload[256];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/set", 0, true, payload);
 }
