@@ -9,3 +9,20 @@ Arduino library for connecting to Homebridge.
 
 ### Installation Guide
 * [PlatformIO](http://platformio.org/lib)
+
+{
+	"esp_thermostat": {
+		"services": {
+			"esp_thermostat": "Thermostat"
+		},
+		"characteristics": {
+			"esp_thermostat": {
+				"CurrentHeatingCoolingState": 1,
+				"TargetHeatingCoolingState": 1,
+				"CurrentTemperature": 29,
+				"TargetTemperature": 35,
+				"TemperatureDisplayUnits": 0
+			}
+		}
+	}
+}

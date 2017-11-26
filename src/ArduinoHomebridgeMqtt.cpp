@@ -3,46 +3,64 @@
 void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(Accessory, Service, Characteristic)> callback) {
   this->callback = callback;
   mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
-    StaticJsonBuffer<256> jsonBuffer;
+    StaticJsonBuffer<512> jsonBuffer;
     JsonObject& root = jsonBuffer.parseObject(payload);
     if (!root.success()) {
       return;
     }
+    Accessory accessory;
+    Service service;
+    Characteristic characteristic;
     if (strcmp(topic, "homebridge/from/set") == 0) {
       String accessoryName = root["name"];
       String serviceName = root["service_name"];
       String characteristicName = root["characteristic"];
       int characteristicValue = root["value"];
-      Accessory accessory;
       accessory.name = accessoryName;
-      Service service;
       service.name = serviceName;
-      Characteristic characteristic;
       characteristic.name = characteristicName;
       characteristic.value = characteristicValue;
       this->callback(accessory, service, characteristic);
     }
     if (strcmp(topic, "homebridge/from/response") == 0) {
-      Accessory accessory;
-      accessory.name = root.begin()->key;
-      JsonObject& servicesObject = root["services"];
-      Service service;
-      service.name = servicesObject.begin()->key;
-      String serviceType = servicesObject.begin()->value;
-      service.type = serviceType;
-      JsonObject& characteristicsObject = root[accessory.name]["characteristics"];
+      if (root["message"]) {
+        String message = root["message"];
+        Serial.println(message);
+        return;
+      }
+      for (auto accessoryIterator = root.begin(); accessoryIterator != root.end(); accessoryIterator.operator++()) {
+        accessory.name = accessoryIterator->key;
+        JsonObject& servicesObject = root[accessory.name]["services"];
+        for (auto serviceIterator = servicesObject.begin(); serviceIterator != servicesObject.end(); serviceIterator.operator++()) {
+          service.name = serviceIterator->key;
+          String serviceType = serviceIterator->value;
+          service.type = serviceType;
+          JsonObject& characteristicsObject = root[accessory.name]["characteristics"][service.name];
+          for (auto characteristicIterator = characteristicsObject.begin(); characteristicIterator != characteristicsObject.end(); characteristicIterator.operator++()) {
+            characteristic.name = characteristicIterator->key;
+            characteristic.value = characteristicIterator->value;
+            this->callback(accessory, service, characteristic);
+          }
+        }
+      }
     }
   });
 }
 
 void ArduinoHomebridgeMqtt::connect(IPAddress server) {
   mqttClient.onConnect([this](bool sessionPresent) -> void {
-    Serial.println("Connected to MQTT host");
+    Serial.println(" Connected");
     mqttClient.subscribe("homebridge/from/set", 0);
     mqttClient.subscribe("homebridge/from/response", 0);
   });
   mqttClient.setServer(server, DEFAULT_MQTT_PORT);
   mqttClient.connect();
+  Serial.print("Connecting to MQTT host:");
+  Serial.print(server.toString());
+  while (!mqttClient.connected()) {
+    Serial.print(".");
+    delay(1000);
+  }
 }
 
 void ArduinoHomebridgeMqtt::addAccessory(Accessory accessory, Service service) {
