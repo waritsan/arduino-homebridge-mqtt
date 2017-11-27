@@ -23,7 +23,7 @@ void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(Accessor
       this->callback(accessory, service, characteristic);
     }
     if (strcmp(topic, "homebridge/from/response") == 0) {
-      if (root["message"]) {
+      if (root.containsKey("message")) {
         String message = root["message"];
         Serial.println(message);
         return;
@@ -71,7 +71,7 @@ void ArduinoHomebridgeMqtt::addAccessory(Accessory accessory, Service service) {
   root["service"] = service.type;
   char payload[128];
   root.printTo(payload);
-  mqttClient.publish("homebridge/to/set", 0, true, payload);
+  mqttClient.publish("homebridge/to/add", 0, true, payload);
 }
 
 void ArduinoHomebridgeMqtt::getAccessory(Accessory accessory) {

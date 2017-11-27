@@ -92,6 +92,7 @@ void setup() {
   currentTemperatureCharacteristic.name = "CurrentTemperature";
   homebridge.onSetValueFromHomebridge(callback);
   homebridge.connect(MQTT_SERVER);
+  homebridge.addAccessory(thermostatAccessory, thermostatService);
   homebridge.getAccessory(thermostatAccessory);
 }
 
