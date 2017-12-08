@@ -83,6 +83,7 @@ void setup() {
   pinMode(COOL_PIN, OUTPUT);
   pinMode(HEAT_PIN, OUTPUT);
   wifiManager.autoConnect();
+
   thermostatAccessory.name = "esp_thermostat";
   thermostatService.name = "esp_thermostat";
   thermostatService.type = "Thermostat";
@@ -90,6 +91,7 @@ void setup() {
   targetTemperatureCharacteristic.name = "TargetTemperature";
   currentHeatingCoolingStateCharacteristic.name = "CurrentHeatingCoolingState";
   currentTemperatureCharacteristic.name = "CurrentTemperature";
+  
   homebridge.onSetValueFromHomebridge(callback);
   homebridge.connect(MQTT_SERVER);
   homebridge.addAccessory(thermostatAccessory, thermostatService);

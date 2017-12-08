@@ -22,18 +22,23 @@ void callback(Accessory accessory, Service service, Characteristic characteristi
     Serial.println("OFF");
     digitalWrite(OUTPUT_PIN, LOW);
   }
+  onCharacteristic = characteristic;
 }
 
 void setup() {
   Serial.begin(115200);
   pinMode(OUTPUT_PIN, OUTPUT);
   wifiManager.autoConnect();
+
   switchAccessory.name = "esp_switch";
   switchService.name = "esp_switch";
   switchService.type = "Switch";
   onCharacteristic.name = "On";
-  homebridgeMqtt.onCallback(callback);
+
+  homebridgeMqtt.onSetValueFromHomebridge(callback);
   homebridgeMqtt.connect(MQTT_SERVER);
+  homebridgeMqtt.addAccessory(switchAccessory, switchService);
+  homebridgeMqtt.getAccessory(switchAccessory);
 }
 
 void loop() {

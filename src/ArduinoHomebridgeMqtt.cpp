@@ -74,6 +74,36 @@ void ArduinoHomebridgeMqtt::addAccessory(Accessory accessory, Service service) {
   mqttClient.publish("homebridge/to/add", 0, true, payload);
 }
 
+void ArduinoHomebridgeMqtt::addService(Accessory accessory, Service service) {
+  StaticJsonBuffer<128> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+  root["name"] = accessory.name;
+  root["service_name"] = service.name;
+  root["service"] = service.type;
+  char payload[128];
+  root.printTo(payload);
+  mqttClient.publish("homebridge/to/add/service", 0, true, payload);
+}
+
+void ArduinoHomebridgeMqtt::removeAccessory(Accessory accessory) {
+  StaticJsonBuffer<128> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+  root["name"] = accessory.name;
+  char payload[128];
+  root.printTo(payload);
+  mqttClient.publish("homebridge/to/remove", 0, true, payload);
+}
+
+void ArduinoHomebridgeMqtt::removeService(Accessory accessory, Service service) {
+  StaticJsonBuffer<128> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+  root["name"] = accessory.name;
+  root["service_name"] = service.name;
+  char payload[128];
+  root.printTo(payload);
+  mqttClient.publish("homebridge/to/remove/service", 0, true, payload);
+}
+
 void ArduinoHomebridgeMqtt::getAccessory(Accessory accessory) {
   StaticJsonBuffer<128> jsonBuffer;
   JsonObject& root = jsonBuffer.createObject();
