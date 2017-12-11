@@ -26,9 +26,19 @@
       "name": "ArduinoJson",
       "authors": "Benoit Blanchon",
       "frameworks": "arduino"
+    },
+    {
+      "name": "DallasTemperature",
+      "authors": "Miles Burton",
+      "frameworks": "arduino"
+    },
+    {
+      "name": "WiFiManager",
+      "authors": "tzapu",
+      "frameworks": "arduino"
     }
   ],
   "version": "0.1.3",
   "frameworks": "arduino",
-  "platforms": "*"
+  "platforms": "espressif8266"
 }
