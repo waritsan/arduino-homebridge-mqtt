@@ -1,21 +1,15 @@
 #include <AsyncMqttClient.h>
 #include <ArduinoJson.h>
+#include "Accessory.h"
+#include "Service.h"
+#include "Characteristic.h"
 
+#ifndef DEFAULT_MQTT_PORT
 #define DEFAULT_MQTT_PORT 1883
+#endif
 
-struct Accessory {
-  String name;
-};
-
-struct Service {
-  String name;
-  String type;
-};
-
-struct Characteristic {
-  String name;
-  int value;
-};
+#ifndef ARDUINO_HOMEBRIDGE_MQTT_H
+#define ARDUINO_HOMEBRIDGE_MQTT_H
 
 class ArduinoHomebridgeMqtt {
 private:
@@ -32,3 +26,5 @@ public:
   void getAccessory(Accessory);
   void setValueToHomebridge(Accessory, Service, Characteristic);
 };
+
+#endif

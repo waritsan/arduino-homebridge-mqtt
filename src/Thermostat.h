@@ -2,6 +2,9 @@
 #include <DallasTemperature.h>
 #include "ArduinoHomebridgeMqtt.h"
 
+#ifndef THERMOSTAT_H
+#define THERMOSTAT_H
+
 class Thermostat {
 private:
   int inputPin;
@@ -25,3 +28,5 @@ public:
   void begin(IPAddress);
   int readTemperature();
 };
+
+#endif
