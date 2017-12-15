@@ -5,7 +5,7 @@
 
 struct Characteristic {
   String name;
-  int value;
+  float value;
 };
 
 #endif

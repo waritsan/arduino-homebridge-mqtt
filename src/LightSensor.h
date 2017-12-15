@@ -15,7 +15,7 @@ private:
 public:
   LightSensor(int);
   void begin(IPAddress);
-  int getCurrentAmbientLightLevel();
+  float readAmbientLight();
 };
 
 #endif

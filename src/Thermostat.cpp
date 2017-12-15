@@ -50,7 +50,7 @@ int Thermostat::readTemperature() {
 
 // Private
 void Thermostat::operate() {
-  switch (targetHeatingCoolingState.value) {
+  switch (int(targetHeatingCoolingState.value)) {
     case 0: off();
             break;
     case 1: (currentTemperature.value < targetTemperature.value) ? heat() : off();

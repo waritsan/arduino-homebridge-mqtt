@@ -16,6 +16,12 @@ void LightSensor::begin(IPAddress mqttServer) {
   homebridgeMqtt.getAccessory(accessory);
 }
 
-int LightSensor::getCurrentAmbientLightLevel() {
-  return currentAmbientLightLevel.value;
+float LightSensor::readAmbientLight() {
+  int value = analogRead(inputPin);
+  float lux = exp(float(value)/80.0);
+  if (currentAmbientLightLevel.value != lux) {
+    currentAmbientLightLevel.value = lux;
+    homebridgeMqtt.setValueToHomebridge(accessory, service, currentAmbientLightLevel);
+  }
+  return lux;
 }
