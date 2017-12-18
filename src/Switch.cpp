@@ -29,6 +29,22 @@ void Switch::begin(IPAddress mqttServer) {
   homebridgeMqtt.getAccessory(accessory);
 }
 
-int Switch::getOnValue() {
+void Switch::turnOn() {
+  if (!on.value) {
+    digitalWrite(outputPin, HIGH);
+    on.value = true;
+    homebridgeMqtt.setValueToHomebridge(accessory, service, on);
+  }
+}
+
+void Switch::turnOff() {
+  if (on.value) {
+    digitalWrite(outputPin, LOW);
+    on.value = false;
+    homebridgeMqtt.setValueToHomebridge(accessory, service, on);
+  }
+}
+
+bool Switch::isOn() {
   return on.value;
 }

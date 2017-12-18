@@ -15,7 +15,9 @@ private:
 public:
   Switch(int);
   void begin(IPAddress);
-  int getOnValue();
+  void turnOn();
+  void turnOff();
+  bool isOn();
 };
 
 #endif

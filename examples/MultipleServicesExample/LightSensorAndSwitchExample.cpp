@@ -23,6 +23,12 @@ void loop() {
   long now = millis();
   if (now - lastMsg > 5000) {
     lastMsg = now;
-    Serial.println(lightSensor.readAmbientLight());
+    float lux = lightSensor.readAmbientLight();
+    Serial.println(lux);
+    if (lux < 1.10) {
+      mySwitch.turnOn();
+    } else {
+      mySwitch.turnOff();
+    }
   }
 }

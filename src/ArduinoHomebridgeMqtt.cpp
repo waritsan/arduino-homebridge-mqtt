@@ -72,6 +72,7 @@ void ArduinoHomebridgeMqtt::addAccessory(Accessory accessory, Service service) {
   char payload[128];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/add", 0, true, payload);
+  delay(1000);
 }
 
 void ArduinoHomebridgeMqtt::addService(Accessory accessory, Service service) {
@@ -83,6 +84,7 @@ void ArduinoHomebridgeMqtt::addService(Accessory accessory, Service service) {
   char payload[128];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/add/service", 0, true, payload);
+  delay(1000);
 }
 
 void ArduinoHomebridgeMqtt::removeAccessory(Accessory accessory) {
@@ -92,6 +94,7 @@ void ArduinoHomebridgeMqtt::removeAccessory(Accessory accessory) {
   char payload[128];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/remove", 0, true, payload);
+  delay(1000);
 }
 
 void ArduinoHomebridgeMqtt::removeService(Accessory accessory, Service service) {
@@ -102,6 +105,7 @@ void ArduinoHomebridgeMqtt::removeService(Accessory accessory, Service service) 
   char payload[128];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/remove/service", 0, true, payload);
+  delay(1000);
 }
 
 void ArduinoHomebridgeMqtt::getAccessory(Accessory accessory) {
@@ -111,6 +115,7 @@ void ArduinoHomebridgeMqtt::getAccessory(Accessory accessory) {
   char payload[128];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/get", 0, true, payload);
+  delay(1000);
 }
 
 void ArduinoHomebridgeMqtt::setValueToHomebridge(Accessory accessory, Service service, Characteristic characteristic) {
@@ -123,4 +128,5 @@ void ArduinoHomebridgeMqtt::setValueToHomebridge(Accessory accessory, Service se
   char payload[256];
   root.printTo(payload);
   mqttClient.publish("homebridge/to/set", 0, true, payload);
+  delay(1000);
 }
