@@ -7,14 +7,9 @@
 class LightSensor {
 private:
   int inputPin;
-  Accessory accessory;
-  Service service;
-  Characteristic currentAmbientLightLevel;
-  ArduinoHomebridgeMqtt homebridgeMqtt;
 
 public:
-  LightSensor(int);
-  void begin(IPAddress);
+  LightSensor(int inputPin);
   float readAmbientLight();
 };
 

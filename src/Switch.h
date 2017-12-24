@@ -7,17 +7,11 @@
 class Switch {
 private:
   int outputPin;
-  Accessory accessory;
-  Service service;
-  Characteristic on;
-  ArduinoHomebridgeMqtt homebridgeMqtt;
 
 public:
   Switch(int);
-  void begin(IPAddress);
-  void turnOn();
-  void turnOff();
-  bool isOn();
+  void on();
+  void off();
 };
 
 #endif
