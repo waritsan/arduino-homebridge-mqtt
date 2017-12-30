@@ -11,6 +11,7 @@
 #define CURRENT_HEATING_COOLING_STATE "CurrentHeatingCoolingState"
 #define TARGET_HEATING_COOLING_STATE "TargetHeatingCoolingState"
 #define TARGET_TEMPERATURE "TargetTemperature"
+#define CURRENT_RELATIVE_HUMIDITY "CurrentRelativeHumidity"
 #define OFF 0
 #define HEAT 1
 #define COOL 2
