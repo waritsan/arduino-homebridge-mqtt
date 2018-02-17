@@ -19,26 +19,30 @@
   [
     {
       "name": "AsyncMqttClient",
-      "authors": "Marvin Roger",
-      "frameworks": "arduino"
+      "version": "0.8.2",
+      "frameworks": "arduino",
+      "platforms": "espressif8266"
     },
     {
       "name": "ArduinoJson",
-      "authors": "Benoit Blanchon",
-      "frameworks": "arduino"
+      "version": "5.13.0",
+      "frameworks": "arduino",
+      "platforms": "espressif8266"
     },
     {
       "name": "DallasTemperature",
-      "authors": "Miles Burton",
-      "frameworks": "arduino"
+      "version": "3.8.0",
+      "frameworks": "arduino",
+      "platforms": "espressif8266"
     },
     {
       "name": "WiFiManager",
-      "authors": "tzapu",
-      "frameworks": "arduino"
+      "version": "0.12",
+      "frameworks": "arduino",
+      "platforms": "espressif8266"
     }
   ],
-  "version": "0.1.6",
+  "version": "0.1.7",
   "frameworks": "arduino",
   "platforms": "espressif8266"
 }
