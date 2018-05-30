@@ -9,3 +9,4 @@ Arduino library for connecting to Homebridge.
 
 ### Installation Guide
 * [PlatformIO](http://platformio.org/lib)
+* [Arduino IDE](https://www.arduino.cc/en/Guide/Libraries#toc4)
