@@ -7,6 +7,7 @@
 #define OUTPUT_PIN D1
 #define SERVICE_NAME "Switch"
 #define SERVICE "Switch";
+#define ON "On"
 
 WiFiManager wifiManager;
 ArduinoHomebridgeMqtt arduinoHomebridgeMqtt;

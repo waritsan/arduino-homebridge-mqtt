@@ -5,18 +5,6 @@
 #define DEFAULT_MQTT_PORT 1883
 #endif
 
-#define ON "On"
-#define CURRENT_AMBIENT_LIGHT_LEVEL "CurrentAmbientLightLevel"
-#define CURRENT_TEMPERATURE "CurrentTemperature"
-#define CURRENT_HEATING_COOLING_STATE "CurrentHeatingCoolingState"
-#define TARGET_HEATING_COOLING_STATE "TargetHeatingCoolingState"
-#define TARGET_TEMPERATURE "TargetTemperature"
-#define CURRENT_RELATIVE_HUMIDITY "CurrentRelativeHumidity"
-#define OFF 0
-#define HEAT 1
-#define COOL 2
-#define AUTO 3
-
 #ifndef ARDUINO_HOMEBRIDGE_MQTT_H
 #define ARDUINO_HOMEBRIDGE_MQTT_H
 

@@ -7,6 +7,7 @@
 #define OUTPUT_PIN D1
 #define SERVICE_NAME "Sprinkler"
 #define SERVICE "Switch"
+#define CURRENT_RELATIVE_HUMIDITY "CurrentRelativeHumidity"
 
 WiFiManager wifiManager;
 ArduinoHomebridgeMqtt arduinoHomebridgeMqtt;
