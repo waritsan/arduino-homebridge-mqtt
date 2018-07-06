@@ -1,9 +1,8 @@
 /*
 	ThermostatExample.ino
 
-	This thermostat example shows how to read a temperature with Dallas temperature sensor attached to 
-  pin D1 and sends the value to Homebridge MQTT server. You can control the thermostat operation from
-  the Home app.
+	This is a thermostat accessory example. It reads a temperature with Dallas temperature sensor attached to 
+  pin D1 and sends the value to Homebridge MQTT server. You can control the thermostat operation from the Home app.
 
 	The circuit:
 	* Inputs
@@ -85,6 +84,9 @@ void cool() {
 
 void setup() {
   Serial.begin(9600);
+  pinMode(INPUT_PIN, INPUT);
+  pinMode(HEAT_PIN, OUTPUT);
+  pinMode(COOL_PIN, OUTPUT);
   wifiManager.autoConnect();
   arduinoHomebridgeMqtt.onSetValueFromHomebridge(callback);
   arduinoHomebridgeMqtt.connect(MQTT_SERVER);
