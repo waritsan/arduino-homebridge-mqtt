@@ -54,10 +54,10 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=examples/HumiditySensorExample/HumiditySensorExample.ino
-    - PLATFORMIO_CI_SRC=examples/LightSensorExample/LightSensorExample.ino
-    - PLATFORMIO_CI_SRC=examples/SwitchExample/SwitchExample.ino
-    - PLATFORMIO_CI_SRC=examples/ThermostatExample/ThermostatExample.ino
+    - PLATFORMIO_CI_SRC=examples/HumiditySensorExample
+    - PLATFORMIO_CI_SRC=examples/LightSensorExample
+    - PLATFORMIO_CI_SRC=examples/SwitchExample
+    - PLATFORMIO_CI_SRC=examples/ThermostatExample
 
 install:
     - pip install -U platformio
