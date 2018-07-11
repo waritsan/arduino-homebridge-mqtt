@@ -64,4 +64,4 @@ install:
     - platformio lib install AsyncMqttClient ArduinoJson WiFiManager DallasTemperature
 
 script:
-    - platformio ci --lib="." --board=ID_1 --board=ID_2 --board=ID_N
+    - platformio ci --lib="." --board=d1_mini
