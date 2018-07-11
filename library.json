@@ -36,7 +36,7 @@
       "platforms": "espressif8266"
     },
     {
-      "name": "WiFiManager",
+      "name": "WifiManager",
       "version": "0.12",
       "frameworks": "arduino",
       "platforms": "espressif8266"
