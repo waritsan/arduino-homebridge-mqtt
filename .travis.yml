@@ -62,7 +62,10 @@ env:
 install:
     - pip install -U platformio
     - platformio update
-    - platformio lib -g install 346 64 567 54
+    #
+    # Libraries from PlatformIO Library Registry:
+    #
+    - platformio lib -g install AsyncMqttClient ArduinoJson WiFiManager DallasTemperature
 
 script:
-    - platformio ci --lib="." --board=d1_mini
+    - platformio ci --lib="." --board=nodemcu
