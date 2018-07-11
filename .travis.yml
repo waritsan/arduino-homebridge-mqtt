@@ -69,7 +69,8 @@ install:
     # https://platformio.org/lib/show/64/ArduinoJson
     # https://platformio.org/lib/show/567/WifiManager
     # https://platformio.org/lib/show/54/DallasTemperature
-    - platformio lib -g install AsyncMqttClient ArduinoJson DallasTemperature https://github.com/tzapu/WiFiManager.git
+    - platformio lib -g uninstall WiFiManager
+    - platformio lib -g install AsyncMqttClient ArduinoJson DallasTemperature WiFiManager
 
 script:
     - platformio ci --lib="." --board=d1_mini
