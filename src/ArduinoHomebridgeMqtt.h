@@ -1,5 +1,6 @@
 #include <AsyncMqttClient.h>
 #include <ArduinoJson.h>
+#include <WiFiManager.h>
 
 #ifndef DEFAULT_MQTT_PORT
 #define DEFAULT_MQTT_PORT 1883
