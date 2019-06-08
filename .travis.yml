@@ -54,10 +54,10 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=examples/HumiditySensorExample
-    - PLATFORMIO_CI_SRC=examples/LightSensorExample
+    # - PLATFORMIO_CI_SRC=examples/HumiditySensorExample
+    # - PLATFORMIO_CI_SRC=examples/LightSensorExample
     - PLATFORMIO_CI_SRC=examples/SwitchExample
-    - PLATFORMIO_CI_SRC=examples/ThermostatExample
+    # - PLATFORMIO_CI_SRC=examples/ThermostatExample
 
 install:
     - pip install -U platformio
@@ -65,11 +65,11 @@ install:
     #
     # Libraries from PlatformIO Library Registry:
     #
-    # https://platformio.org/lib/show/346/AsyncMqttClient
+    # https://platformio.org/lib/show/89/PubSubClient
     # https://platformio.org/lib/show/64/ArduinoJson
     # https://platformio.org/lib/show/567/WifiManager
-    # https://platformio.org/lib/show/54/DallasTemperature
-    - platformio lib -g install WifiManager, PubSubClient, ArduinoJson
+    - platformio lib -g install 567, 89, 64
+    - export PLATFORMIO_BUILD_FLAGS="-D MQTT_MAX_PACKET_SIZE=512"
 
 script:
     - platformio ci --lib="." --board=d1_mini
