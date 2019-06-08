@@ -68,7 +68,7 @@ install:
     # https://platformio.org/lib/show/89/PubSubClient
     # https://platformio.org/lib/show/64/ArduinoJson
     # https://platformio.org/lib/show/567/WifiManager
-    - platformio lib -g install 567 89 64
+    - platformio lib -g install ArduinoJson PubSubClient WifiManager
     - export PLATFORMIO_BUILD_FLAGS="-D MQTT_MAX_PACKET_SIZE=512"
 
 script:
