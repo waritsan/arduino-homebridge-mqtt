@@ -18,31 +18,25 @@
   "dependencies":
   [
     {
-      "name": "AsyncMqttClient",
-      "version": "0.8.2",
+      "name": "PubSubClient",
+      "version": "2.7",
       "frameworks": "arduino",
       "platforms": "espressif8266"
     },
     {
       "name": "ArduinoJson",
-      "version": "5.13.0",
-      "frameworks": "arduino",
-      "platforms": "espressif8266"
-    },
-    {
-      "name": "DallasTemperature",
-      "version": "3.8.0",
+      "version": "6.11.0",
       "frameworks": "arduino",
       "platforms": "espressif8266"
     },
     {
       "name": "WifiManager",
-      "version": "0.12",
+      "version": "0.14",
       "frameworks": "arduino",
       "platforms": "espressif8266"
     }
   ],
-  "version": "0.1.9",
+  "version": "0.1.10",
   "frameworks": "arduino",
   "platforms": "espressif8266"
 }

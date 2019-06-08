@@ -1,4 +1,6 @@
-#include <AsyncMqttClient.h>
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 #include <ArduinoJson.h>
 
 #ifndef DEFAULT_MQTT_PORT
@@ -10,20 +12,24 @@
 
 class ArduinoHomebridgeMqtt {
 private:
-  AsyncMqttClient mqttClient;
-  String accessoryName;
-  std::function<void(String serviceName, String characteristic, float value)> callback;
+  PubSubClient *client;
+  char mName[16];
+  std::function<void(const char* serviceName, const char* characteristic, int value)> callback;
+  void publish(const char* topic, const char* payload);
 
 public:
   ArduinoHomebridgeMqtt();
-  void onSetValueFromHomebridge(std::function<void(String serviceName, String characteristic, float value)>);
-  void connect(IPAddress);
-  void addAccessory(String serviceName, String service);
-  void addService(String serviceName, String service);
+  ~ArduinoHomebridgeMqtt();
+  void setServer(IPAddress server, int port);
+  void onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)>);
+  void connect();
+  void addAccessory(const char* serviceName, const char* service);
+  void addService(const char* serviceName, const char* service);
   void removeAccessory();
-  void removeService(String serviceName);
+  void removeService(const char* serviceName);
   void getAccessory();
-  void setValueToHomebridge(String serviceName, String characteristic, float value);
+  void setValueToHomebridge(const char* serviceName, const char* characteristic, int value);
+  void loop();
 };
 
 #endif

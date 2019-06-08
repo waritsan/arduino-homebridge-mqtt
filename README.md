@@ -12,3 +12,27 @@ Arduino library for connecting to Homebridge.
 ### Installation Guide
 * [PlatformIO](http://platformio.org/lib)
 * [Arduino IDE](https://www.arduino.cc/en/Guide/Libraries#toc4)
+
+### Usage
+```
+#include <ArduinoHomebridgeMqtt.h>
+
+ArduinoHomebridgeMqtt client;
+
+void operateSwitch(const char* serviceName, const char* characteristic, int value) {
+  if (strcmp(serviceName, "My Switch") == 0) {
+    digitalWrite(D1, value);
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  client.setServer(IPAddress(192, 168, 1, 1), 1883);
+  client.onSetValueFromHomebridge(operateSwitch);
+  client.connect();
+}
+
+void loop() {
+  client.loop();
+}
+```
