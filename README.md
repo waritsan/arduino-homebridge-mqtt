@@ -14,7 +14,7 @@ Arduino library for connecting to Homebridge.
 * [Arduino IDE](https://www.arduino.cc/en/Guide/Libraries#toc4)
 
 ### Usage
-```
+```cpp
 #include <ArduinoHomebridgeMqtt.h>
 
 ArduinoHomebridgeMqtt client;
