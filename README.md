@@ -20,16 +20,15 @@ Arduino library for connecting to Homebridge.
 ArduinoHomebridgeMqtt client;
 
 void operateSwitch(const char* serviceName, const char* characteristic, int value) {
-  if (strcmp(serviceName, "My Switch") == 0) {
+  if (strcmp(serviceName, "MySwitch") == 0) {
     digitalWrite(D1, value);
   }
 }
 
 void setup() {
   Serial.begin(9600);
-  client.setServer(IPAddress(192, 168, 1, 1), 1883);
   client.onSetValueFromHomebridge(operateSwitch);
-  client.connect();
+  client.connect(IPAddress(192, 168, 1, 1));
 }
 
 void loop() {
