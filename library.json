@@ -1,7 +1,7 @@
 {
   "name": "ArduinoHomebridgeMqtt",
   "keywords": "homebridge, homekit",
-  "description": "Arduino library for connecting to Homebridge",
+  "description": "Arduino library for connecting to Homebridge via MQTT",
   "repository":
   {
     "type": "git",
@@ -18,8 +18,8 @@
   "dependencies":
   [
     {
-      "name": "PubSubClient",
-      "version": "2.7",
+      "name": "AsyncMqttClient",
+      "version": "0.8.2",
       "frameworks": "arduino",
       "platforms": "espressif8266"
     },
@@ -36,7 +36,7 @@
       "platforms": "espressif8266"
     }
   ],
-  "version": "0.1.10",
+  "version": "0.1.11",
   "frameworks": "arduino",
   "platforms": "espressif8266"
 }
