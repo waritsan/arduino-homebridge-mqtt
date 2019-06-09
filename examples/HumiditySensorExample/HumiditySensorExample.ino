@@ -7,22 +7,17 @@
 	* Input
         A0 - Soil moisture sensor
 
-	Created Jul 11, 2017
-	By Warit Santaputra
-	Modified Jul 11, 2018
-	By Warit Santaputra
-
 */
 
 #include <Arduino.h>
 #include <WiFiManager.h>
 #include "ArduinoHomebridgeMqtt.h"
 
-const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 40);
+const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 48);
 const int INPUT_PIN = A0;
-const String HUMIDITY_SENSOR_NAME = "HumiditySensor";
-const String HUMIDITY_SENSOR_SERVICE = "HumiditySensor";
-const String CURRENT_RELATIVE_HUMIDITY = "CurrentRelativeHumidity";
+const char* HUMIDITY_SENSOR_NAME = "HumiditySensor";
+const char* HUMIDITY_SENSOR_SERVICE = "HumiditySensor";
+const char* CURRENT_RELATIVE_HUMIDITY = "CurrentRelativeHumidity";
 
 long lastMsg = 0;
 WiFiManager wifiManager;
@@ -35,7 +30,7 @@ int readHumidity(int inputPin) {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   wifiManager.autoConnect();
   arduinoHomebridgeMqtt.connect(MQTT_SERVER);
   arduinoHomebridgeMqtt.addAccessory(HUMIDITY_SENSOR_NAME, HUMIDITY_SENSOR_SERVICE);
@@ -52,4 +47,5 @@ void loop() {
     Serial.println("%");
     arduinoHomebridgeMqtt.setValueToHomebridge(HUMIDITY_SENSOR_NAME, CURRENT_RELATIVE_HUMIDITY, currentHumidity);
   }
+  arduinoHomebridgeMqtt.loop();
 }

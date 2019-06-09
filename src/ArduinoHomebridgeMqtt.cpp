@@ -18,7 +18,8 @@ ArduinoHomebridgeMqtt::~ArduinoHomebridgeMqtt() {
 void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)> callback) {
   this->callback = callback;
   mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
-    Serial.printf("Message arrived [%s] %s\n", topic, payload);
+    Serial.printf("Message arrived [%s] ", topic);
+    Serial.println(payload);
     if (strcmp(topic, "homebridge/from/response") == 0) {
       StaticJsonDocument<512> doc;
       deserializeJson(doc, payload);
@@ -51,7 +52,7 @@ void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const ch
 
 void ArduinoHomebridgeMqtt::initMqtt(IPAddress server) {
   mqttClient.onConnect([this](bool sessionPresent) -> void {
-    Serial.println(" Connected");
+    Serial.println("connected");
     mqttClient.subscribe("homebridge/from/set", 0);
     mqttClient.subscribe("homebridge/from/response", 0);
   });
@@ -70,7 +71,6 @@ void ArduinoHomebridgeMqtt::connect() {
     Serial.print(".");
     delay(1000);
   }
-  Serial.println("connected.");
 }
 
 void ArduinoHomebridgeMqtt::loop() {
@@ -131,7 +131,7 @@ void ArduinoHomebridgeMqtt::getAccessory() {
 }
 
 void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* serviceName, const char* characteristic, int value) {
-  StaticJsonDocument<64> doc;
+  StaticJsonDocument<256> doc;
   doc["name"] = mName;
   doc["service_name"] = serviceName;
   doc["characteristic"] = characteristic;
