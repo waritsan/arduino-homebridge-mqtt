@@ -13,13 +13,15 @@ private:
   AsyncMqttClient mqttClient;
   char* mName;
   std::function<void(const char* serviceName, const char* characteristic, int value)> callback;
+  void publish(const char* topic, const char* payload);
 
 public:
   ArduinoHomebridgeMqtt();
-  ArduinoHomebridgeMqtt(const char* name);
+  ArduinoHomebridgeMqtt(const char* name, IPAddress server);
   ~ArduinoHomebridgeMqtt();
   void onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)>);
-  void connect(IPAddress);
+  void connect();
+  void loop();
   void addAccessory(const char* serviceName, const char* service);
   void addService(const char* serviceName, const char* service);
   void removeAccessory();

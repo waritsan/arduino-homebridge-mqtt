@@ -5,9 +5,15 @@ ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt() {
   itoa(ESP.getChipId(), mName, 10);
 }
 
-ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(const char* name) {
+ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(const char* name, IPAddress server) {
   mName = new char[16];
   strcpy(mName, name);
+  mqttClient.setServer(server, DEFAULT_MQTT_PORT);
+  mqttClient.onConnect([this](bool sessionPresent) -> void {
+    Serial.println(" Connected");
+    mqttClient.subscribe("homebridge/from/set", 0);
+    mqttClient.subscribe("homebridge/from/response", 0);
+  });
 }
 
 ArduinoHomebridgeMqtt::~ArduinoHomebridgeMqtt() {
@@ -17,117 +23,117 @@ ArduinoHomebridgeMqtt::~ArduinoHomebridgeMqtt() {
 void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)> callback) {
   this->callback = callback;
   mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
-    StaticJsonBuffer<512> jsonBuffer;
-    JsonObject& root = jsonBuffer.parseObject(payload);
-    if (!root.success()) {
-      return;
-    }
-    if (strcmp(topic, "homebridge/from/set") == 0) {
-      const char* mName = root["name"];
-      this->callback(root["service_name"], root["characteristic"], root["value"]);
-    }
+    Serial.printf("Message arrived [%s] %s\n", topic, payload);
     if (strcmp(topic, "homebridge/from/response") == 0) {
-      if (root.containsKey("message")) {
-        const char* message = root["message"];
-        Serial.println(message);
-        return;
-      }
-      for (auto accessoryIterator = root.begin(); accessoryIterator != root.end(); accessoryIterator.operator++()) {
-        if (mName == accessoryIterator->key) {
-          JsonObject& servicesObject = root[mName]["services"];
-          for (auto serviceIterator = servicesObject.begin(); serviceIterator != servicesObject.end(); serviceIterator.operator++()) {
-            const char* serviceName = serviceIterator->key;
-            JsonObject& characteristicsObject = root[mName]["characteristics"][serviceName];
-            for (auto characteristicIterator = characteristicsObject.begin(); characteristicIterator != characteristicsObject.end(); characteristicIterator.operator++()) {
-              this->callback(serviceName, characteristicIterator->key, characteristicIterator->value);
-            }
+      StaticJsonDocument<512> doc;
+      deserializeJson(doc, payload);
+      if (doc.containsKey("ack")) return;
+      if (doc.containsKey(mName)) {
+        JsonObject serviceNames = doc[mName]["characteristics"].as<JsonObject>();
+        for (JsonPair serviceNameKeyValue: serviceNames) {
+          const char* serviceName = serviceNameKeyValue.key().c_str();
+          JsonObject characteristics = serviceNameKeyValue.value().as<JsonObject>();
+          for (JsonPair characteristicKeyValue: characteristics) {
+            const char* characteristic = characteristicKeyValue.key().c_str();
+            const int value = characteristicKeyValue.value().as<int>();
+            this->callback(serviceName, characteristic, value);
           }
         }
+      }
+    } else if (strcmp(topic, "homebridge/from/set") == 0) {
+      StaticJsonDocument<256> doc;
+      deserializeJson(doc, payload);
+      const char* name = doc["name"];
+      if (strcmp(name, mName) == 0) {
+        const char* serviceName = doc["service_name"];
+        const char* characteristic = doc["characteristic"];
+        const int value = doc["value"];
+        this->callback(serviceName, characteristic, value);
       }
     }
   });
 }
 
-void ArduinoHomebridgeMqtt::connect(IPAddress server) {
-  mqttClient.onConnect([this](bool sessionPresent) -> void {
-    Serial.println(" Connected");
-    mqttClient.subscribe("homebridge/from/set", 0);
-    mqttClient.subscribe("homebridge/from/response", 0);
-  });
-  mqttClient.setServer(server, DEFAULT_MQTT_PORT);
+void ArduinoHomebridgeMqtt::connect() {
+  Serial.print("Connecting to MQTT host...");
   mqttClient.connect();
-  Serial.print("Connecting to MQTT host:");
-  Serial.print(server.toconst char*());
   while (!mqttClient.connected()) {
     Serial.print(".");
     delay(1000);
   }
+  Serial.println("connected.");
+}
+
+void ArduinoHomebridgeMqtt::loop() {
+  if (!mqttClient.connected()) {
+    Serial.println("MQTT host disconnected.");
+    connect();
+  }
 }
 
 void ArduinoHomebridgeMqtt::addAccessory(const char* serviceName, const char* service) {
-  StaticJsonBuffer<128> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = mName;
-  root["service_name"] = serviceName;
-  root["service"] = service;
+  StaticJsonDocument<128> doc;
+  doc["name"] = mName;
+  doc["service_name"] = serviceName;
+  doc["service"] = service;
   char payload[128];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/add", 0, true, payload);
-  delay(1000);
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/add";
+  publish(topic, payload);
 }
 
 void ArduinoHomebridgeMqtt::addService(const char* serviceName, const char* service) {
-  StaticJsonBuffer<128> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = mName;
-  root["service_name"] = serviceName;
-  root["service"] = service;
+  StaticJsonDocument<128> doc;
+  doc["name"] = mName;
+  doc["service_name"] = serviceName;
+  doc["service"] = service;
   char payload[128];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/add/service", 0, true, payload);
-  delay(1000);
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/add/service";
+  publish(topic, payload);
 }
 
 void ArduinoHomebridgeMqtt::removeAccessory() {
-  StaticJsonBuffer<128> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = mName;
-  char payload[128];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/remove", 0, true, payload);
-  delay(1000);
+  StaticJsonDocument<64> doc;
+  doc["name"] = mName;
+  char payload[64];
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/remove";
+  publish(topic, payload);
 }
 
 void ArduinoHomebridgeMqtt::removeService(const char* serviceName) {
-  StaticJsonBuffer<128> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = mName;
-  root["service_name"] = serviceName;
+  StaticJsonDocument<128> doc;
+  doc["name"] = mName;
+  doc["service_name"] = serviceName;
   char payload[128];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/remove/service", 0, true, payload);
-  delay(1000);
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/remove/service";
+  publish(topic, payload);
 }
 
 void ArduinoHomebridgeMqtt::getAccessory() {
-  StaticJsonBuffer<128> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = mName;
-  char payload[128];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/get", 0, true, payload);
-  delay(1000);
+  StaticJsonDocument<64> doc;
+  doc["name"] = mName;
+  char payload[64];
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/get";
+  publish(topic, payload);
 }
 
 void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* serviceName, const char* characteristic, int value) {
-  StaticJsonBuffer<256> jsonBuffer;
-  JsonObject& root = jsonBuffer.createObject();
-  root["name"] = mName;
-  root["service_name"] = serviceName;
-  root["characteristic"] = characteristic;
-  root["value"] = value;
+  StaticJsonDocument<64> doc;
+  doc["name"] = mName;
+  doc["service_name"] = serviceName;
+  doc["characteristic"] = characteristic;
+  doc["value"] = value;
   char payload[256];
-  root.printTo(payload);
-  mqttClient.publish("homebridge/to/set", 0, true, payload);
-  delay(1000);
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/set";
+  publish(topic, payload);
+}
+
+void ArduinoHomebridgeMqtt::publish(const char* topic, const char* payload) {
+  mqttClient.publish(topic, 0, true, payload);
+  Serial.printf("Message sent [%s] %s\n", topic, payload);
 }
