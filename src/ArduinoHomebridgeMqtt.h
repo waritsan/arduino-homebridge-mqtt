@@ -11,19 +11,21 @@
 class ArduinoHomebridgeMqtt {
 private:
   AsyncMqttClient mqttClient;
-  String accessoryName;
-  std::function<void(String serviceName, String characteristic, float value)> callback;
+  char* mName;
+  std::function<void(const char* serviceName, const char* characteristic, int value)> callback;
 
 public:
   ArduinoHomebridgeMqtt();
-  void onSetValueFromHomebridge(std::function<void(String serviceName, String characteristic, float value)>);
+  ArduinoHomebridgeMqtt(const char* name);
+  ~ArduinoHomebridgeMqtt();
+  void onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)>);
   void connect(IPAddress);
-  void addAccessory(String serviceName, String service);
-  void addService(String serviceName, String service);
+  void addAccessory(const char* serviceName, const char* service);
+  void addService(const char* serviceName, const char* service);
   void removeAccessory();
-  void removeService(String serviceName);
+  void removeService(const char* serviceName);
   void getAccessory();
-  void setValueToHomebridge(String serviceName, String characteristic, float value);
+  void setValueToHomebridge(const char* serviceName, const char* characteristic, int value);
 };
 
 #endif
