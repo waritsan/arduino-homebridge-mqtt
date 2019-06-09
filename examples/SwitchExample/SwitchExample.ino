@@ -9,10 +9,7 @@
 */
 
 #include <Arduino.h>
-#include <ESP8266WiFi.h>
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WifiManager.h>
+#include <WiFiManager.h>
 #include "ArduinoHomebridgeMqtt.h"
 
 const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 48);
