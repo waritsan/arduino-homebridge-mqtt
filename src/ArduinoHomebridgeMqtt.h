@@ -1,5 +1,3 @@
-#include <Arduino.h>
-#include <ESP8266WiFi.h>
 #include <AsyncMqttClient.h>
 #include <ArduinoJson.h>
 
