@@ -14,6 +14,7 @@ private:
   char* mName;
   std::function<void(const char* serviceName, const char* characteristic, int value)> callback;
   void publish(const char* topic, const char* payload);
+  void initMqtt(IPAddress server);
 
 public:
   ArduinoHomebridgeMqtt();
@@ -21,6 +22,7 @@ public:
   ~ArduinoHomebridgeMqtt();
   void onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)>);
   void connect();
+  void connect(IPAddress server);
   void loop();
   void addAccessory(const char* serviceName, const char* service);
   void addService(const char* serviceName, const char* service);
