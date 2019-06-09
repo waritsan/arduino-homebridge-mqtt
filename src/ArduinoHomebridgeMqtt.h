@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h>
+#include <AsyncMqttClient.h>
 #include <ArduinoJson.h>
 
 #ifndef DEFAULT_MQTT_PORT
@@ -12,24 +12,26 @@
 
 class ArduinoHomebridgeMqtt {
 private:
-  PubSubClient *client;
-  char mName[16];
+  AsyncMqttClient mqttClient;
+  char* mName;
   std::function<void(const char* serviceName, const char* characteristic, int value)> callback;
   void publish(const char* topic, const char* payload);
+  void initMqtt(IPAddress server);
 
 public:
   ArduinoHomebridgeMqtt();
+  ArduinoHomebridgeMqtt(const char* name, IPAddress server);
   ~ArduinoHomebridgeMqtt();
-  void setServer(IPAddress server, int port);
   void onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)>);
   void connect();
+  void connect(IPAddress server);
+  void loop();
   void addAccessory(const char* serviceName, const char* service);
   void addService(const char* serviceName, const char* service);
   void removeAccessory();
   void removeService(const char* serviceName);
   void getAccessory();
   void setValueToHomebridge(const char* serviceName, const char* characteristic, int value);
-  void loop();
 };
 
 #endif

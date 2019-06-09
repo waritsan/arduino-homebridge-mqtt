@@ -1,29 +1,25 @@
 #include "ArduinoHomebridgeMqtt.h"
 
 ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt() {
-  itoa(ESP.getChipId(), this->mName, 10);
-  WiFiClient espClient;
-  this->client = new PubSubClient(espClient);
+  mName = new char[16];
+  itoa(ESP.getChipId(), mName, 10);
+}
+
+ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(const char* name, IPAddress server) {
+  mName = new char[16];
+  strcpy(mName, name);
+  initMqtt(server);
 }
 
 ArduinoHomebridgeMqtt::~ArduinoHomebridgeMqtt() {
-  free(this->client);
-}
-
-void ArduinoHomebridgeMqtt::setServer(IPAddress server, int port) {
-  this->client->setServer(server, port);
+  free(mName);
 }
 
 void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)> callback) {
   this->callback = callback;
-  this->client->setCallback([this](char* topic, byte* payload, unsigned int length) -> void {
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    for (unsigned int i = 0; i < length; i++) {
-      Serial.print((char) payload[i]);
-    }
-    Serial.println();
+  mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
+    Serial.printf("Message arrived [%s] ", topic);
+    Serial.println(payload);
     if (strcmp(topic, "homebridge/from/response") == 0) {
       StaticJsonDocument<512> doc;
       deserializeJson(doc, payload);
@@ -54,24 +50,33 @@ void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const ch
   });
 }
 
-void ArduinoHomebridgeMqtt::loop() {
+void ArduinoHomebridgeMqtt::initMqtt(IPAddress server) {
+  mqttClient.onConnect([this](bool sessionPresent) -> void {
+    Serial.println("connected");
+    mqttClient.subscribe("homebridge/from/set", 0);
+    mqttClient.subscribe("homebridge/from/response", 0);
+  });
+  mqttClient.setServer(server, DEFAULT_MQTT_PORT);
+}
+
+void ArduinoHomebridgeMqtt::connect(IPAddress server) {
+  initMqtt(server);
   connect();
-  client->loop();
 }
 
 void ArduinoHomebridgeMqtt::connect() {
-  while (!client->connected()) {
-    Serial.print("Attempting MQTT connection...");
-    if (client->connect("arduinoClient")) {
-      Serial.println("connected");
-      client->subscribe("homebridge/from/response");
-      client->subscribe("homebridge/from/set");
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client->state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
-    }
+  Serial.print("Connecting to MQTT host...");
+  mqttClient.connect();
+  while (!mqttClient.connected()) {
+    Serial.print(".");
+    delay(1000);
+  }
+}
+
+void ArduinoHomebridgeMqtt::loop() {
+  if (!mqttClient.connected()) {
+    Serial.println("MQTT host disconnected.");
+    connect();
   }
 }
 
@@ -126,7 +131,7 @@ void ArduinoHomebridgeMqtt::getAccessory() {
 }
 
 void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* serviceName, const char* characteristic, int value) {
-  StaticJsonDocument<64> doc;
+  StaticJsonDocument<256> doc;
   doc["name"] = mName;
   doc["service_name"] = serviceName;
   doc["characteristic"] = characteristic;
@@ -138,6 +143,6 @@ void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* serviceName, const 
 }
 
 void ArduinoHomebridgeMqtt::publish(const char* topic, const char* payload) {
-  client->publish(topic, payload);
+  mqttClient.publish(topic, 0, true, payload);
   Serial.printf("Message sent [%s] %s\n", topic, payload);
 }

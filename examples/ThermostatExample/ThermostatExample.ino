@@ -10,29 +10,24 @@
 	* Outputs
         D2 - output for heating
         D3 - output for cooling
-
-	Created Oct 19, 2017
-	By Warit Santaputra
-	Modified Jul 5, 2018
-	By Warit Santaputra
-
 */
 
 #include <Arduino.h>
+#include <OneWire.h>
 #include <DallasTemperature.h>
 #include <WiFiManager.h>
 #include "ArduinoHomebridgeMqtt.h"
 
-const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 40);
+const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 48);
 const int INPUT_PIN = D1;
 const int HEAT_PIN = D2;
 const int COOL_PIN = D3;
-const String SERVICE_NAME = "Thermostat";
-const String SERVICE = "Thermostat";
-const String CURRENT_HEATING_COOLING_STATE = "CurrentHeatingCoolingState";
-const String TARGET_HEATNG_COOLING_STATE = "TargetHeatingCoolingState";
-const String CURRENT_TEMPERATURE = "CurrentTemperature";
-const String TARGET_TEMPERATURE = "TargetTemperature";
+const char* SERVICE_NAME = "Thermostat";
+const char* SERVICE = "Thermostat";
+const char* CURRENT_HEATING_COOLING_STATE = "CurrentHeatingCoolingState";
+const char* TARGET_HEATNG_COOLING_STATE = "TargetHeatingCoolingState";
+const char* CURRENT_TEMPERATURE = "CurrentTemperature";
+const char* TARGET_TEMPERATURE = "TargetTemperature";
 const int OFF = 0;
 const int HEAT = 1;
 const int COOL = 2;
@@ -41,45 +36,48 @@ const int AUTO = 3;
 long lastMsg = 0;
 WiFiManager wifiManager;
 ArduinoHomebridgeMqtt arduinoHomebridgeMqtt;
-float targetTemperature;
-float currentTemperature;
+int targetTemperature;
+int currentTemperature;
 int targetHeatingCoolingState;
 int currentHeatingCoolingState;
 
 // This gets called when a value is set from the Home app.
-void callback(String serviceName, String characteristic, float value) {
-  if (serviceName == SERVICE_NAME) {
-    if (characteristic == TARGET_TEMPERATURE) { 
+void callback(const char* serviceName, const char* characteristic, int value) {
+  if (strcmp(serviceName, SERVICE_NAME) == 0) {
+    if (strcmp(characteristic, TARGET_TEMPERATURE) == 0) { 
       targetTemperature = value;
-    } else if (characteristic == TARGET_HEATNG_COOLING_STATE) {
+    } else if (strcmp(characteristic, TARGET_HEATNG_COOLING_STATE) == 0) {
       targetHeatingCoolingState = value;
     }
   }
 }
 
-float readTemperature(int inputPin) {
+int readTemperature(int inputPin) {
   OneWire oneWire(inputPin);
   DallasTemperature dallasTemperature(&oneWire);
   dallasTemperature.requestTemperatures();
-  return dallasTemperature.getTempCByIndex(0);
+  float tempC = dallasTemperature.getTempCByIndex(0);
+  return (int) tempC;
 }
 
-void off() {
+int off() {
   digitalWrite(COOL_PIN, LOW);
   digitalWrite(HEAT_PIN, LOW);
   currentHeatingCoolingState = OFF;
+  return OFF;
 }
 
-void heat() {
+int heat() {
   digitalWrite(COOL_PIN, LOW);
   digitalWrite(HEAT_PIN, HIGH);
   currentHeatingCoolingState = HEAT;
+  return HEAT;
 }
 
-void cool() {
+int cool() {
   digitalWrite(COOL_PIN, HIGH);
   digitalWrite(HEAT_PIN, LOW);
-  currentHeatingCoolingState = COOL;
+  return COOL;
 }
 
 void setup() {
@@ -90,7 +88,6 @@ void setup() {
   wifiManager.autoConnect();
   arduinoHomebridgeMqtt.onSetValueFromHomebridge(callback);
   arduinoHomebridgeMqtt.connect(MQTT_SERVER);
-  arduinoHomebridgeMqtt.addAccessory(SERVICE_NAME, SERVICE);
   arduinoHomebridgeMqtt.getAccessory();
 }
 
@@ -98,21 +95,27 @@ void loop() {
   long now = millis();
   if (now - lastMsg > 5000) {
     lastMsg = now;
-    currentTemperature = readTemperature(INPUT_PIN);
-    switch (targetHeatingCoolingState) {
-      case HEAT: (currentTemperature < targetTemperature) ? heat() : off();
-                 break;
-      case COOL: (currentTemperature < targetTemperature) ? off() : cool();
-                 break;
-      case AUTO: (currentTemperature < targetTemperature) ? heat() : cool();
-                 break;
-      default: off();
+    int newTemperature = readTemperature(INPUT_PIN);
+    if (newTemperature != currentTemperature) {
+      currentTemperature = newTemperature;
+      Serial.print("Curent temperature: ");
+      Serial.println(currentTemperature);
+      arduinoHomebridgeMqtt.setValueToHomebridge(SERVICE_NAME, CURRENT_TEMPERATURE, currentTemperature);
     }
-    Serial.print("Current temperature: ");
-    Serial.print(currentTemperature);
-    Serial.print(", Current heating cooling state: ");
-    Serial.println(currentHeatingCoolingState);
-    arduinoHomebridgeMqtt.setValueToHomebridge(SERVICE_NAME, CURRENT_TEMPERATURE, currentTemperature);
-    arduinoHomebridgeMqtt.setValueToHomebridge(SERVICE_NAME, CURRENT_HEATING_COOLING_STATE, currentHeatingCoolingState);
+    int newHeatingCoolingState;
+    switch (targetHeatingCoolingState) {
+      case HEAT: (currentTemperature < targetTemperature) ? newHeatingCoolingState = heat() : newHeatingCoolingState = off();
+                 break;
+      case COOL: (currentTemperature < targetTemperature) ? newHeatingCoolingState = off() : newHeatingCoolingState = cool();
+                 break;
+      case AUTO: (currentTemperature < targetTemperature) ? newHeatingCoolingState = heat() : newHeatingCoolingState = cool();
+                 break;
+      default: newHeatingCoolingState = off();
+    }
+    if (currentHeatingCoolingState != newHeatingCoolingState) {
+      currentHeatingCoolingState = newHeatingCoolingState;
+      arduinoHomebridgeMqtt.setValueToHomebridge(SERVICE_NAME, CURRENT_HEATING_COOLING_STATE, currentHeatingCoolingState);
+    }
   }
+  arduinoHomebridgeMqtt.loop();
 }

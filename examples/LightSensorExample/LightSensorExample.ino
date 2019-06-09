@@ -6,23 +6,17 @@
 	The circuit:
 	* Input
         A0 - Photoresistor
-
-	Created Jul 10, 2017
-	By Warit Santaputra
-	Modified Jul 10, 2018
-	By Warit Santaputra
-
 */
 
 #include <Arduino.h>
 #include <WiFiManager.h>
 #include "ArduinoHomebridgeMqtt.h"
 
-const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 40);
+const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 48);
 const int INPUT_PIN = A0;
-const String LIGHT_SENSOR_NAME = "LightSensor";
-const String LIGHT_SENSOR_SERVICE = "LightSensor";
-const String CURRENT_AMBIENT_LIGHT_LEVEL = "CurrentAmbientLightLevel";
+const char* LIGHT_SENSOR_NAME = "LightSensor";
+const char* LIGHT_SENSOR_SERVICE = "LightSensor";
+const char* CURRENT_AMBIENT_LIGHT_LEVEL = "CurrentAmbientLightLevel";
 
 long lastMsg = 0;
 WiFiManager wifiManager;
@@ -37,8 +31,6 @@ void setup() {
   Serial.begin(115200);
   wifiManager.autoConnect();
   arduinoHomebridgeMqtt.connect(MQTT_SERVER);
-  arduinoHomebridgeMqtt.addAccessory(LIGHT_SENSOR_NAME, LIGHT_SENSOR_SERVICE);
-  arduinoHomebridgeMqtt.getAccessory();
 }
 
 void loop() {
@@ -51,4 +43,5 @@ void loop() {
     Serial.println(" lux");
     arduinoHomebridgeMqtt.setValueToHomebridge(LIGHT_SENSOR_NAME, CURRENT_AMBIENT_LIGHT_LEVEL, ambientLight);
   }
+  arduinoHomebridgeMqtt.loop();
 }
