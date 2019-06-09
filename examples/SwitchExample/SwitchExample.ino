@@ -14,7 +14,7 @@
 
 const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 48);
 const int OUTPUT_PIN = D1;
-const char* SERVICE_NAME = "Switch";
+const char* SERVICE_NAME = "Light";
 const char* SERVICE = "Switch";
 
 WiFiManager wifiManager;
