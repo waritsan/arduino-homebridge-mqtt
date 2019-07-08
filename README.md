@@ -15,6 +15,7 @@ Arduino library for connecting to Homebridge.
 
 ### Usage
 ```cpp
+// Switch example
 #include <ArduinoHomebridgeMqtt.h>
 
 ArduinoHomebridgeMqtt client;
@@ -28,10 +29,11 @@ void operateSwitch(const char* serviceName, const char* characteristic, int valu
 void setup() {
   Serial.begin(9600);
   client.onSetValueFromHomebridge(operateSwitch);
-  client.connect(IPAddress(192, 168, 1, 1));
+  client.connect(IPAddress(192, 168, 1, 1)); // Replace the IP with your MQTT server IP
 }
 
 void loop() {
   client.loop();
 }
 ```
+See other examples in /examples
