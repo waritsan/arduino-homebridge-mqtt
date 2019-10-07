@@ -66,8 +66,8 @@ void ArduinoHomebridgeMqtt::connect(IPAddress server) {
 
 void ArduinoHomebridgeMqtt::connect() {
   Serial.print("Connecting to MQTT host...");
-  mqttClient.connect();
   while (!mqttClient.connected()) {
+    mqttClient.connect();
     Serial.print(".");
     delay(1000);
   }
