@@ -10,7 +10,7 @@ Arduino library for connecting to Homebridge.
 * [Homebridge-MQTT](https://github.com/cflurin/homebridge-mqtt)
 
 ### Installation Guide
-* [PlatformIO](http://platformio.org/lib)
+* [PlatformIO](https://platformio.org/lib/show/1907/ArduinoHomebridgeMqtt)
 * [Arduino IDE](https://www.arduino.cc/en/Guide/Libraries#toc4)
 
 ### Usage
