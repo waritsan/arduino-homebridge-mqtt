@@ -32,6 +32,7 @@ void setup() {
   wifiManager.autoConnect();
   arduinoHomebridgeMqtt.onSetValueFromHomebridge(callback);
   arduinoHomebridgeMqtt.connect(MQTT_SERVER);
+  arduinoHomebridgeMqtt.addAccessory(SERVICE_NAME, SERVICE);
   arduinoHomebridgeMqtt.getAccessory();
 }
 
