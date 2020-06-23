@@ -16,24 +16,39 @@ Arduino library for connecting to Homebridge.
 ### Usage
 ```cpp
 // Switch example
-#include <ArduinoHomebridgeMqtt.h>
+#include <Arduino.h>
+#include <WiFiManager.h> // You can you anything else to connect to WiFi.
+#include <ArduinoHomebridgeMqtt.h>        
 
-ArduinoHomebridgeMqtt client;
+const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 48); // Put your MQTT server IP address here.
+const int OUTPUT_PIN = D1;
+const char* NAME = "flex_lamp"; // Accessory name must be unique
+const char* SERVICE_NAME = "Light"; // Service name. 
+const char* SERVICE = "Switch"; // Service as defined in Homebridge
 
-void operateSwitch(const char* serviceName, const char* characteristic, int value) {
-  if (strcmp(serviceName, "MySwitch") == 0) {
-    digitalWrite(D1, value);
+WiFiManager wifiManager;
+ArduinoHomebridgeMqtt arduinoHomebridgeMqtt;
+
+// This function gets called when there is a message from homebridge eg. when value(s) is set via Home app.
+void callback(const char* name, const char* serviceName, const char* characteristic, int value) {
+  if (strcmp(name, NAME) == 0) { // Check to see if the message is for this accessory.
+    if (strcmp(serviceName, SERVICE_NAME) == 0) { // Check if the message is to set the value for service "Light".
+      digitalWrite(OUTPUT_PIN, value);
+    }
   }
 }
 
 void setup() {
   Serial.begin(9600);
-  client.onSetValueFromHomebridge(operateSwitch);
-  client.connect(IPAddress(192, 168, 1, 1)); // Replace the IP with your MQTT server IP
+  pinMode(OUTPUT_PIN, OUTPUT);
+  wifiManager.autoConnect();
+  arduinoHomebridgeMqtt.onSetValueFromHomebridge(callback);
+  arduinoHomebridgeMqtt.connect(MQTT_SERVER);
+  arduinoHomebridgeMqtt.addAccessory(NAME, SERVICE_NAME, SERVICE); // If running the first time, you need to add the accessory first.
+  arduinoHomebridgeMqtt.getAccessory(NAME); // Get accessory states
 }
 
 void loop() {
-  client.loop();
+  arduinoHomebridgeMqtt.loop();
 }
 ```
-See other examples in /examples

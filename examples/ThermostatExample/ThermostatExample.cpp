@@ -2,7 +2,7 @@
 	ThermostatExample.ino
 
 	This is a thermostat accessory example. It reads a temperature with Dallas temperature sensor attached to 
-  pin D1 and sends the value to Homebridge MQTT server. You can control the thermostat operation from the Home app.
+  pin D1 and sends the value to Homebridge MQTT server. You can control the thermostat from the Home app.
 
 	The circuit:
 	* Inputs
@@ -16,12 +16,13 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <WiFiManager.h>
-#include "ArduinoHomebridgeMqtt.h"
+#include <ArduinoHomebridgeMqtt.h>
 
 const IPAddress MQTT_SERVER = IPAddress(192, 168, 1, 48);
 const int INPUT_PIN = D1;
 const int HEAT_PIN = D2;
 const int COOL_PIN = D3;
+const char* NAME = "esp_thermostat";
 const char* SERVICE_NAME = "Thermostat";
 const char* SERVICE = "Thermostat";
 const char* CURRENT_HEATING_COOLING_STATE = "CurrentHeatingCoolingState";
@@ -42,12 +43,14 @@ int targetHeatingCoolingState;
 int currentHeatingCoolingState;
 
 // This gets called when a value is set from the Home app.
-void callback(const char* serviceName, const char* characteristic, int value) {
-  if (strcmp(serviceName, SERVICE_NAME) == 0) {
-    if (strcmp(characteristic, TARGET_TEMPERATURE) == 0) { 
-      targetTemperature = value;
-    } else if (strcmp(characteristic, TARGET_HEATNG_COOLING_STATE) == 0) {
-      targetHeatingCoolingState = value;
+void callback(const char* name, const char* serviceName, const char* characteristic, int value) {
+  if (strcmp(name, NAME) == 0) {
+    if (strcmp(serviceName, SERVICE_NAME) == 0) {
+      if (strcmp(characteristic, TARGET_TEMPERATURE) == 0) { 
+        targetTemperature = value;
+      } else if (strcmp(characteristic, TARGET_HEATNG_COOLING_STATE) == 0) {
+        targetHeatingCoolingState = value;
+      }
     }
   }
 }
@@ -88,7 +91,8 @@ void setup() {
   wifiManager.autoConnect();
   arduinoHomebridgeMqtt.onSetValueFromHomebridge(callback);
   arduinoHomebridgeMqtt.connect(MQTT_SERVER);
-  arduinoHomebridgeMqtt.getAccessory();
+  arduinoHomebridgeMqtt.addAccessory(NAME, SERVICE_NAME, SERVICE);
+  arduinoHomebridgeMqtt.getAccessory(NAME);
 }
 
 void loop() {
@@ -100,7 +104,7 @@ void loop() {
       currentTemperature = newTemperature;
       Serial.print("Curent temperature: ");
       Serial.println(currentTemperature);
-      arduinoHomebridgeMqtt.setValueToHomebridge(SERVICE_NAME, CURRENT_TEMPERATURE, currentTemperature);
+      arduinoHomebridgeMqtt.setValueToHomebridge(NAME, SERVICE_NAME, CURRENT_TEMPERATURE, currentTemperature);
     }
     int newHeatingCoolingState;
     switch (targetHeatingCoolingState) {
@@ -114,7 +118,7 @@ void loop() {
     }
     if (currentHeatingCoolingState != newHeatingCoolingState) {
       currentHeatingCoolingState = newHeatingCoolingState;
-      arduinoHomebridgeMqtt.setValueToHomebridge(SERVICE_NAME, CURRENT_HEATING_COOLING_STATE, currentHeatingCoolingState);
+      arduinoHomebridgeMqtt.setValueToHomebridge(NAME, SERVICE_NAME, CURRENT_HEATING_COOLING_STATE, currentHeatingCoolingState);
     }
   }
   arduinoHomebridgeMqtt.loop();

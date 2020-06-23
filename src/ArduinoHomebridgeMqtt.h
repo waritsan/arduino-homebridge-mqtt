@@ -11,25 +11,22 @@
 class ArduinoHomebridgeMqtt {
 private:
   AsyncMqttClient mqttClient;
-  char* mName;
-  std::function<void(const char* serviceName, const char* characteristic, int value)> callback;
+  std::function<void(const char* name, const char* serviceName, const char* characteristic, int value)> callback;
   void publish(const char* topic, const char* payload);
   void initMqtt(IPAddress server);
-
+  void connect();
+  
 public:
   ArduinoHomebridgeMqtt();
-  ArduinoHomebridgeMqtt(const char* name, IPAddress server);
-  ~ArduinoHomebridgeMqtt();
-  void onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)>);
-  void connect();
+  void onSetValueFromHomebridge(std::function<void(const char* name, const char* serviceName, const char* characteristic, int value)>);
   void connect(IPAddress server);
   void loop();
-  void addAccessory(const char* serviceName, const char* service);
-  void addService(const char* serviceName, const char* service);
-  void removeAccessory();
-  void removeService(const char* serviceName);
-  void getAccessory();
-  void setValueToHomebridge(const char* serviceName, const char* characteristic, int value);
+  void addAccessory(const char* name, const char* serviceName, const char* service);
+  void addService(const char* name, const char* serviceName, const char* service);
+  void removeAccessory(const char* name);
+  void removeService(const char* name, const char* serviceName);
+  void getAccessory(const char* name);
+  void setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, int value);
 };
 
 #endif

@@ -1,51 +1,38 @@
 #include "ArduinoHomebridgeMqtt.h"
 
-ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt() {
-  mName = new char[16];
-  itoa(ESP.getChipId(), mName, 10);
-}
+ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt() {}
 
-ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt(const char* name, IPAddress server) {
-  mName = new char[16];
-  strcpy(mName, name);
-  initMqtt(server);
-}
-
-ArduinoHomebridgeMqtt::~ArduinoHomebridgeMqtt() {
-  free(mName);
-}
-
-void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const char* serviceName, const char* characteristic, int value)> callback) {
+void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const char* name, const char* serviceName, const char* characteristic, int value)> callback) {
   this->callback = callback;
   mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
-    Serial.printf("Message arrived [%s] ", topic);
-    Serial.println(payload);
+    // Serial.printf("Message arrived [%s] ", topic);
+    // Serial.println(payload);
     if (strcmp(topic, "homebridge/from/response") == 0) {
       StaticJsonDocument<512> doc;
       deserializeJson(doc, payload);
       if (doc.containsKey("ack")) return;
-      if (doc.containsKey(mName)) {
-        JsonObject serviceNames = doc[mName]["characteristics"].as<JsonObject>();
-        for (JsonPair serviceNameKeyValue: serviceNames) {
-          const char* serviceName = serviceNameKeyValue.key().c_str();
-          JsonObject characteristics = serviceNameKeyValue.value().as<JsonObject>();
-          for (JsonPair characteristicKeyValue: characteristics) {
-            const char* characteristic = characteristicKeyValue.key().c_str();
-            const int value = characteristicKeyValue.value().as<int>();
-            this->callback(serviceName, characteristic, value);
-          }
+      int index = 0;
+      JsonObject::iterator it = doc.as<JsonObject>().begin();
+      it += index;
+      const char* name = it->key().c_str();
+      JsonObject serviceNames = doc[name]["characteristics"].as<JsonObject>();
+      for (JsonPair serviceNameKeyValue: serviceNames) {
+        const char* serviceName = serviceNameKeyValue.key().c_str();
+        JsonObject characteristics = serviceNameKeyValue.value().as<JsonObject>();
+        for (JsonPair characteristicKeyValue: characteristics) {
+          const char* characteristic = characteristicKeyValue.key().c_str();
+          const int value = characteristicKeyValue.value().as<int>();
+          this->callback(name, serviceName, characteristic, value);
         }
       }
     } else if (strcmp(topic, "homebridge/from/set") == 0) {
       StaticJsonDocument<256> doc;
       deserializeJson(doc, payload);
       const char* name = doc["name"];
-      if (strcmp(name, mName) == 0) {
-        const char* serviceName = doc["service_name"];
-        const char* characteristic = doc["characteristic"];
-        const int value = doc["value"];
-        this->callback(serviceName, characteristic, value);
-      }
+      const char* serviceName = doc["service_name"];
+      const char* characteristic = doc["characteristic"];
+      const int value = doc["value"];
+      this->callback(name, serviceName, characteristic, value);
     }
   });
 }
@@ -80,9 +67,9 @@ void ArduinoHomebridgeMqtt::loop() {
   }
 }
 
-void ArduinoHomebridgeMqtt::addAccessory(const char* serviceName, const char* service) {
+void ArduinoHomebridgeMqtt::addAccessory(const char* name, const char* serviceName, const char* service) {
   StaticJsonDocument<128> doc;
-  doc["name"] = mName;
+  doc["name"] = name;
   doc["service_name"] = serviceName;
   doc["service"] = service;
   char payload[128];
@@ -91,9 +78,9 @@ void ArduinoHomebridgeMqtt::addAccessory(const char* serviceName, const char* se
   publish(topic, payload);
 }
 
-void ArduinoHomebridgeMqtt::addService(const char* serviceName, const char* service) {
+void ArduinoHomebridgeMqtt::addService(const char* name, const char* serviceName, const char* service) {
   StaticJsonDocument<128> doc;
-  doc["name"] = mName;
+  doc["name"] = name;
   doc["service_name"] = serviceName;
   doc["service"] = service;
   char payload[128];
@@ -102,18 +89,18 @@ void ArduinoHomebridgeMqtt::addService(const char* serviceName, const char* serv
   publish(topic, payload);
 }
 
-void ArduinoHomebridgeMqtt::removeAccessory() {
+void ArduinoHomebridgeMqtt::removeAccessory(const char* name) {
   StaticJsonDocument<64> doc;
-  doc["name"] = mName;
+  doc["name"] = name;
   char payload[64];
   serializeJson(doc, payload);
   const char* topic = "homebridge/to/remove";
   publish(topic, payload);
 }
 
-void ArduinoHomebridgeMqtt::removeService(const char* serviceName) {
+void ArduinoHomebridgeMqtt::removeService(const char* name, const char* serviceName) {
   StaticJsonDocument<128> doc;
-  doc["name"] = mName;
+  doc["name"] = name;
   doc["service_name"] = serviceName;
   char payload[128];
   serializeJson(doc, payload);
@@ -121,18 +108,18 @@ void ArduinoHomebridgeMqtt::removeService(const char* serviceName) {
   publish(topic, payload);
 }
 
-void ArduinoHomebridgeMqtt::getAccessory() {
+void ArduinoHomebridgeMqtt::getAccessory(const char* name) {
   StaticJsonDocument<64> doc;
-  doc["name"] = mName;
+  doc["name"] = name;
   char payload[64];
   serializeJson(doc, payload);
   const char* topic = "homebridge/to/get";
   publish(topic, payload);
 }
 
-void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* serviceName, const char* characteristic, int value) {
+void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, int value) {
   StaticJsonDocument<256> doc;
-  doc["name"] = mName;
+  doc["name"] = name;
   doc["service_name"] = serviceName;
   doc["characteristic"] = characteristic;
   doc["value"] = value;
@@ -144,5 +131,5 @@ void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* serviceName, const 
 
 void ArduinoHomebridgeMqtt::publish(const char* topic, const char* payload) {
   mqttClient.publish(topic, 0, true, payload);
-  Serial.printf("Message sent [%s] %s\n", topic, payload);
+  // Serial.printf("Message sent [%s] %s\n", topic, payload);
 }
