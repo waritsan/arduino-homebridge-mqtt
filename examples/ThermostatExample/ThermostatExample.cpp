@@ -1,6 +1,5 @@
 /*
 	ThermostatExample.ino
-
 	This is a thermostat accessory example. It reads a temperature with Dallas temperature sensor attached to 
   pin D1 and sends the value to Homebridge MQTT server. You can control the thermostat from the Home app.
 
@@ -66,14 +65,12 @@ int readTemperature(int inputPin) {
 int off() {
   digitalWrite(COOL_PIN, LOW);
   digitalWrite(HEAT_PIN, LOW);
-  currentHeatingCoolingState = OFF;
   return OFF;
 }
 
 int heat() {
   digitalWrite(COOL_PIN, LOW);
   digitalWrite(HEAT_PIN, HIGH);
-  currentHeatingCoolingState = HEAT;
   return HEAT;
 }
 
