@@ -54,8 +54,6 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=examples/HumiditySensorExample
-    - PLATFORMIO_CI_SRC=examples/LightSensorExample
     - PLATFORMIO_CI_SRC=examples/SwitchExample
     - PLATFORMIO_CI_SRC=examples/ThermostatExample
 
