@@ -22,7 +22,11 @@ public:
   void connect(IPAddress server);
   void loop();
   void addAccessory(const char* name, const char* serviceName, const char* service);
+  void addAccessory(const char* name, const char* serviceName, const char* service, const char* characteristics[]);
+  void addAccessory(const char* name, const char* serviceName, const char* service, JsonObjectConst characteristics);
   void addService(const char* name, const char* serviceName, const char* service);
+  void addService(const char* name, const char* serviceName, const char* service, const char* characteristics[]);
+  void addService(const char* name, const char* serviceName, const char* service, JsonObjectConst characteristics);
   void removeAccessory(const char* name);
   void removeService(const char* name, const char* serviceName);
   void getAccessory(const char* name);

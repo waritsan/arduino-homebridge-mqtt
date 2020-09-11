@@ -78,12 +78,66 @@ void ArduinoHomebridgeMqtt::addAccessory(const char* name, const char* serviceNa
   publish(topic, payload);
 }
 
+void ArduinoHomebridgeMqtt::addAccessory(const char* name, const char* serviceName, const char* service, const char* characteristics[]) {
+  StaticJsonDocument<1024> chs;
+  for (int i = 0;;i++) {
+    const char* ch = characteristics[i];
+    if (ch) {
+      chs[ch] = "default";
+    } else {
+      break;
+    }
+  }
+  addAccessory(name, serviceName, service, chs.as<JsonObjectConst>());
+}
+
+void ArduinoHomebridgeMqtt::addAccessory(const char* name, const char* serviceName, const char* service, JsonObjectConst characteristics) {
+  StaticJsonDocument<1024> doc;
+  doc["name"] = name;
+  doc["service_name"] = serviceName;
+  doc["service"] = service;
+  for (auto kvp : characteristics) {
+    doc[kvp.key()] = kvp.value();
+  }
+  char payload[1024];
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/add";
+  publish(topic, payload);
+}
+
 void ArduinoHomebridgeMqtt::addService(const char* name, const char* serviceName, const char* service) {
   StaticJsonDocument<128> doc;
   doc["name"] = name;
   doc["service_name"] = serviceName;
   doc["service"] = service;
   char payload[128];
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/add/service";
+  publish(topic, payload);
+}
+
+void ArduinoHomebridgeMqtt::addService(const char* name, const char* serviceName, const char* service, const char* characteristics[]) {
+  StaticJsonDocument<1024> chs;
+  for (int i = 0;;i++) {
+    const char* ch = characteristics[i];
+    if (ch) {
+      chs[ch] = "default";
+    } else {
+      break;
+    }
+  }
+  addService(name, serviceName, service, chs.as<JsonObjectConst>());
+}
+
+void ArduinoHomebridgeMqtt::addService(const char* name, const char* serviceName, const char* service, JsonObjectConst characteristics) {
+  StaticJsonDocument<1024> doc;
+  doc["name"] = name;
+  doc["service_name"] = serviceName;
+  doc["service"] = service;
+  for (auto kvp : characteristics) {
+    doc[kvp.key()] = kvp.value();
+  }
+  char payload[1024];
   serializeJson(doc, payload);
   const char* topic = "homebridge/to/add/service";
   publish(topic, payload);
