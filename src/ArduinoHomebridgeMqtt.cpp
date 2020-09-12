@@ -33,6 +33,12 @@ void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const ch
       const char* characteristic = doc["characteristic"];
       const int value = doc["value"];
       this->callback(name, serviceName, characteristic, value);
+    } else if (strcmp(topic, "homebridge/debug/set") == 0) {
+      if (strncmp(payload, "on", 2) == 0) {
+        setDebugEnabled(true);
+      } else if (strncmp(payload, "off", 3) == 0) {
+        setDebugEnabled(false);
+      }
     }
   });
 }
@@ -42,6 +48,7 @@ void ArduinoHomebridgeMqtt::initMqtt(IPAddress server) {
     Serial.println("connected");
     mqttClient.subscribe("homebridge/from/set", 0);
     mqttClient.subscribe("homebridge/from/response", 0);
+    mqttClient.subscribe("homebridge/debug/set", 0);
   });
   mqttClient.setServer(server, DEFAULT_MQTT_PORT);
 }
@@ -132,4 +139,36 @@ void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* name, const char* s
 void ArduinoHomebridgeMqtt::publish(const char* topic, const char* payload) {
   mqttClient.publish(topic, 0, true, payload);
   // Serial.printf("Message sent [%s] %s\n", topic, payload);
+}
+
+void ArduinoHomebridgeMqtt::setDebugEnabled(bool enabled) {
+  this->debugMode = true;
+  debug(enabled ? "enabled" : "disabled");
+  this->debugMode = enabled;
+}
+
+void ArduinoHomebridgeMqtt::debug(const char* message) {
+  const char* topic = "homebridge/debug";
+  if (this->debugMode) {
+    mqttClient.publish(topic, 0, false, message);
+  }
+}
+
+void ArduinoHomebridgeMqtt::debugf(const char* format, ...) {
+  const char* topic = "homebridge/debug";
+  if (this->debugMode) {
+    va_list args;
+    va_start(args, format);
+
+    char *message;
+    vasprintf(&message, format, args);
+    if (message) {
+      mqttClient.publish(topic, 0, false, message);
+      free(message);
+    } else {
+      mqttClient.publish(topic, 0, false, "ERROR: Could not allocate formatted debug message");
+    }
+
+    va_end(args);
+  }
 }
