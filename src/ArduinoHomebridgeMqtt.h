@@ -10,6 +10,7 @@
 
 class ArduinoHomebridgeMqtt {
 private:
+  bool debugMode = false;
   AsyncMqttClient mqttClient;
   std::function<void(const char* name, const char* serviceName, const char* characteristic, JsonVariantConst value)> callback;
   void publish(const char* topic, const char* payload);
@@ -31,6 +32,9 @@ public:
   void removeService(const char* name, const char* serviceName);
   void getAccessory(const char* name);
   void setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, int value);
+  void setDebugEnabled(bool enabled);
+  void debug(const char* message);
+  void debugf(const char* format, ...);
   void setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, float value);
   void setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, JsonVariantConst value);
 };
