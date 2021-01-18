@@ -2,7 +2,7 @@
 
 ArduinoHomebridgeMqtt::ArduinoHomebridgeMqtt() {}
 
-void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const char* name, const char* serviceName, const char* characteristic, int value)> callback) {
+void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const char* name, const char* serviceName, const char* characteristic, JsonVariantConst value)> callback) {
   this->callback = callback;
   mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) -> void {
     // Serial.printf("Message arrived [%s] ", topic);
@@ -21,7 +21,7 @@ void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const ch
         JsonObject characteristics = serviceNameKeyValue.value().as<JsonObject>();
         for (JsonPair characteristicKeyValue: characteristics) {
           const char* characteristic = characteristicKeyValue.key().c_str();
-          const int value = characteristicKeyValue.value().as<int>();
+          JsonVariantConst value = characteristicKeyValue.value().as<JsonVariantConst>();
           this->callback(name, serviceName, characteristic, value);
         }
       }
@@ -31,7 +31,7 @@ void ArduinoHomebridgeMqtt::onSetValueFromHomebridge(std::function<void(const ch
       const char* name = doc["name"];
       const char* serviceName = doc["service_name"];
       const char* characteristic = doc["characteristic"];
-      const int value = doc["value"];
+      JsonVariantConst value = doc["value"];
       this->callback(name, serviceName, characteristic, value);
     }
   });
@@ -172,6 +172,30 @@ void ArduinoHomebridgeMqtt::getAccessory(const char* name) {
 }
 
 void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, int value) {
+  StaticJsonDocument<256> doc;
+  doc["name"] = name;
+  doc["service_name"] = serviceName;
+  doc["characteristic"] = characteristic;
+  doc["value"] = value;
+  char payload[256];
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/set";
+  publish(topic, payload);
+}
+
+void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, float value) {
+  StaticJsonDocument<256> doc;
+  doc["name"] = name;
+  doc["service_name"] = serviceName;
+  doc["characteristic"] = characteristic;
+  doc["value"] = value;
+  char payload[256];
+  serializeJson(doc, payload);
+  const char* topic = "homebridge/to/set";
+  publish(topic, payload);
+}
+
+void ArduinoHomebridgeMqtt::setValueToHomebridge(const char* name, const char* serviceName, const char* characteristic, JsonVariantConst value) {
   StaticJsonDocument<256> doc;
   doc["name"] = name;
   doc["service_name"] = serviceName;
